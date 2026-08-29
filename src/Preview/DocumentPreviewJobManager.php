@@ -6,6 +6,7 @@ namespace SohoPHP\SoFinder\Preview;
 
 use SohoPHP\SoFinder\Contract\ActorProviderInterface;
 use SohoPHP\SoFinder\Contract\AtomicStateStoreInterface;
+use SohoPHP\SoFinder\Contract\DocumentPreviewDispatcherInterface;
 use SohoPHP\SoFinder\Contract\MetricsStoreInterface;
 use SohoPHP\SoFinder\Exception\SoFinderException;
 
@@ -18,13 +19,13 @@ final readonly class DocumentPreviewJobManager
         private string $mode = 'auto',
         private int $jobTtlSeconds = 86400,
         private int $cacheTtlSeconds = 604800,
-        private ?object $bus = null,
+        private ?DocumentPreviewDispatcherInterface $dispatcher = null,
         private ?AtomicStateStoreInterface $state = null,
         private ?MetricsStoreInterface $metrics = null,
         private ?\Closure $clock = null,
     ) {
         if (!in_array($mode, ['auto', 'inline', 'messenger'], true) || $jobTtlSeconds < 60 || $cacheTtlSeconds < 60) throw new \InvalidArgumentException('The document preview job configuration is invalid.');
-        if ($mode === 'messenger' && !$this->hasBus()) throw new \InvalidArgumentException('Document preview messenger mode requires messenger.default_bus.');
+        if ($mode === 'messenger' && !$this->hasDispatcher()) throw new \InvalidArgumentException('Document preview messenger mode requires an available document preview dispatcher.');
     }
 
     /** @return array<string,mixed> */
@@ -106,7 +107,7 @@ final readonly class DocumentPreviewJobManager
 
     public function asynchronous(): bool
     {
-        return $this->mode === 'messenger' || ($this->mode === 'auto' && $this->hasBus());
+        return $this->mode === 'messenger' || ($this->mode === 'auto' && $this->hasDispatcher());
     }
 
     /** @return array{configuredMode:string,effectiveMode:string,queueAvailable:bool,counts:array{queued:int,running:int,ready:int,failed:int,expired:int},lastSuccessfulAt:?int} */
@@ -121,7 +122,7 @@ final readonly class DocumentPreviewJobManager
             if (is_string($status) && isset($counts[$status])) ++$counts[$status];
             if ($status === 'ready') $lastSuccessfulAt = max($lastSuccessfulAt ?? 0, (int) ($job['finishedAt'] ?? $job['updatedAt'] ?? 0)) ?: $lastSuccessfulAt;
         }
-        return ['configuredMode' => $this->mode, 'effectiveMode' => $this->asynchronous() ? 'messenger' : 'inline', 'queueAvailable' => $this->hasBus(), 'counts' => $counts, 'lastSuccessfulAt' => $lastSuccessfulAt];
+        return ['configuredMode' => $this->mode, 'effectiveMode' => $this->asynchronous() ? 'messenger' : 'inline', 'queueAvailable' => $this->hasDispatcher(), 'counts' => $counts, 'lastSuccessfulAt' => $lastSuccessfulAt];
     }
 
     public function cleanup(): int
@@ -142,12 +143,11 @@ final readonly class DocumentPreviewJobManager
 
     private function dispatch(string $id): void
     {
-        $bus = $this->bus;
-        if ($bus === null || !method_exists($bus, 'dispatch')) throw new SoFinderException('The document preview queue is unavailable.', 'document_preview_queue_unavailable', 503);
-        $bus->dispatch(new DocumentPreviewMessage($id));
+        if (!$this->hasDispatcher()) throw new SoFinderException('The document preview queue is unavailable.', 'document_preview_queue_unavailable', 503);
+        $this->dispatcher?->dispatch(new DocumentPreviewMessage($id));
     }
 
-    private function hasBus(): bool { return $this->bus !== null && method_exists($this->bus, 'dispatch'); }
+    private function hasDispatcher(): bool { return $this->dispatcher?->available() === true; }
 
     private function fail(string $id, \Throwable $exception): void
     {
