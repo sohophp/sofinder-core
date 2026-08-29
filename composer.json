@@ -1,0 +1,36 @@
+{
+    "name": "sohophp/sofinder-core",
+    "description": "Framework-independent file management core for SoFinder",
+    "type": "library",
+    "license": "MIT",
+    "homepage": "https://sofinder.sohophp.app/",
+    "keywords": ["file-manager", "storage", "headless"],
+    "support": {
+        "issues": "https://github.com/sohophp/sofinder/issues",
+        "source": "https://github.com/sohophp/sofinder"
+    },
+    "require": {
+        "php": "^8.2",
+        "ext-fileinfo": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "psr/event-dispatcher": "^1.0",
+        "psr/log": "^3.0"
+    },
+    "conflict": {
+        "sohophp/sofinder-legacy": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "SohoPHP\\SoFinder\\": "src/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "1.x-dev"
+        }
+    }
+}
