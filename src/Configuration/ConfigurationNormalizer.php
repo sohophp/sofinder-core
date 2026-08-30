@@ -24,7 +24,7 @@ final class ConfigurationNormalizer
         'trash_dir' => '%kernel.project_dir%/var/sofinder/trash',
         'cluster' => ['state_service' => null, 'chunk_upload_store_service' => null, 'shared_preview_cache' => false],
         'signed_urls' => ['enabled' => false, 'secret' => '%kernel.secret%', 'default_ttl_seconds' => 300, 'max_ttl_seconds' => 3600],
-        'picker' => ['allowed_origins' => []],
+        'picker' => ['allowed_origins' => [], 'lock_resource' => true],
         'asset_catalog' => ['enabled' => false, 'store_service' => null, 'register_existing' => 'lazy', 'alt_locales' => ['en', 'zh-cn', 'zh-tw']],
         'asset_search' => ['enabled' => true, 'provider_service' => null, 'max_scanned_entries' => 10000],
         'asset_usage' => ['enabled' => false, 'store_service' => null],
@@ -194,7 +194,7 @@ final class ConfigurationNormalizer
         $this->enum($config, 'maintenance.mode', ['inline', 'messenger', 'external', 'disabled']);
 
         foreach ([
-            'cluster.shared_preview_cache', 'signed_urls.enabled', 'asset_catalog.enabled',
+            'cluster.shared_preview_cache', 'signed_urls.enabled', 'picker.lock_resource', 'asset_catalog.enabled',
             'asset_search.enabled', 'asset_usage.enabled', 'asset_access_sessions.enabled',
             'workspaces.enabled', 'uploads.naming.lowercase_extensions',
             'ckeditor4.overwrite_on_upload', 'image_processing.watermark_font_auto_download',
