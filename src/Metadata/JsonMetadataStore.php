@@ -7,9 +7,9 @@ namespace SohoPHP\SoFinder\Metadata;
 use SohoPHP\SoFinder\Contract\QuickAccessMetadataStoreInterface;
 use SohoPHP\SoFinder\Exception\SoFinderException;
 
-final readonly class JsonMetadataStore implements QuickAccessMetadataStoreInterface
+final class JsonMetadataStore implements QuickAccessMetadataStoreInterface
 {
-    public function __construct(private string $file)
+    public function __construct(private readonly string $file)
     {
     }
 

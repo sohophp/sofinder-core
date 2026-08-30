@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace SohoPHP\SoFinder\Value;
 
-final readonly class TrashItem implements \JsonSerializable
+final class TrashItem implements \JsonSerializable
 {
     public function __construct(
-        public string $id,
-        public string $resource,
-        public string $path,
-        public bool $directory,
-        public int $size,
-        public int $deletedAt,
-        public int $expiresAt,
+        public readonly string $id,
+        public readonly string $resource,
+        public readonly string $path,
+        public readonly bool $directory,
+        public readonly int $size,
+        public readonly int $deletedAt,
+        public readonly int $expiresAt,
     ) {
     }
 

@@ -8,9 +8,9 @@ use SohoPHP\SoFinder\Contract\AtomicStateStoreInterface;
 use SohoPHP\SoFinder\Contract\GaugeMetricsStoreInterface;
 
 /** Cluster-wide counters backed by the configured Redis or PDO atomic state store. */
-final readonly class SharedMetricsStore implements GaugeMetricsStoreInterface
+final class SharedMetricsStore implements GaugeMetricsStoreInterface
 {
-    public function __construct(private AtomicStateStoreInterface $state) {}
+    public function __construct(private readonly AtomicStateStoreInterface $state) {}
 
     public function increment(string $name, array $labels = [], int $amount = 1): void
     {

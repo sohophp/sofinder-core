@@ -7,9 +7,9 @@ namespace SohoPHP\SoFinder\Framework;
 use SohoPHP\SoFinder\Contract\RequestContextProviderInterface;
 use SohoPHP\SoFinder\Value\RequestContext;
 
-final readonly class CallbackRequestContextProvider implements RequestContextProviderInterface
+final class CallbackRequestContextProvider implements RequestContextProviderInterface
 {
-    private \Closure $provider;
+    private readonly \Closure $provider;
 
     /** @param callable():?RequestContext $provider */
     public function __construct(callable $provider)

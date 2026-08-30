@@ -9,9 +9,9 @@ use SohoPHP\SoFinder\Contract\UsageTrackerInterface;
 use SohoPHP\SoFinder\Exception\SoFinderException;
 use SohoPHP\SoFinder\Value\ResourceStorage;
 
-final readonly class PersistentUsageTracker implements UsageTrackerInterface
+final class PersistentUsageTracker implements UsageTrackerInterface
 {
-    public function __construct(private string $directory)
+    public function __construct(private readonly string $directory)
     {
     }
 

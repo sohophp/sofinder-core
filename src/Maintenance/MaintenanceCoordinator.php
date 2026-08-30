@@ -7,16 +7,16 @@ namespace SohoPHP\SoFinder\Maintenance;
 use SohoPHP\SoFinder\Contract\AtomicStateStoreInterface;
 use SohoPHP\SoFinder\Contract\MaintenanceDispatcherInterface;
 
-final readonly class MaintenanceCoordinator
+final class MaintenanceCoordinator
 {
     public function __construct(
-        private string $directory,
-        private string $mode,
-        private int $minimumInterval,
-        private int $maximumItems,
-        private MaintenanceRunner $runner,
-        private ?MaintenanceDispatcherInterface $dispatcher = null,
-        private ?AtomicStateStoreInterface $state = null,
+        private readonly string $directory,
+        private readonly string $mode,
+        private readonly int $minimumInterval,
+        private readonly int $maximumItems,
+        private readonly MaintenanceRunner $runner,
+        private readonly ?MaintenanceDispatcherInterface $dispatcher = null,
+        private readonly ?AtomicStateStoreInterface $state = null,
     ) {
     }
 

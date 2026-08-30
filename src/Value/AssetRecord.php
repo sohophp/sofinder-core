@@ -4,25 +4,25 @@ declare(strict_types=1);
 
 namespace SohoPHP\SoFinder\Value;
 
-final readonly class AssetRecord implements \JsonSerializable
+final class AssetRecord implements \JsonSerializable
 {
     /**
      * @param list<string> $tags
      * @param array<string,string> $altTranslations
      */
     public function __construct(
-        public string $id,
-        public string $workspace,
-        public string $resource,
-        public string $path,
-        public string $version,
-        public ?string $alt = null,
-        public ?string $title = null,
-        public array $tags = [],
-        public int $metadataVersion = 1,
-        public int $updatedAt = 0,
-        public bool $deleted = false,
-        public array $altTranslations = [],
+        public readonly string $id,
+        public readonly string $workspace,
+        public readonly string $resource,
+        public readonly string $path,
+        public readonly string $version,
+        public readonly ?string $alt = null,
+        public readonly ?string $title = null,
+        public readonly array $tags = [],
+        public readonly int $metadataVersion = 1,
+        public readonly int $updatedAt = 0,
+        public readonly bool $deleted = false,
+        public readonly array $altTranslations = [],
     ) {
     }
 

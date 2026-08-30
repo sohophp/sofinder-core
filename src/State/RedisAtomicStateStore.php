@@ -8,13 +8,13 @@ use SohoPHP\SoFinder\Contract\AtomicStateStoreInterface;
 use SohoPHP\SoFinder\Exception\SoFinderException;
 
 /** Shared state backed by ext-redis. The supplied connection remains host-owned. */
-final readonly class RedisAtomicStateStore implements AtomicStateStoreInterface
+final class RedisAtomicStateStore implements AtomicStateStoreInterface
 {
     public function __construct(
-        private \Redis $redis,
-        private string $prefix = 'sofinder:',
-        private int $lockTtlMilliseconds = 60_000,
-        private int $waitMilliseconds = 2_000,
+        private readonly \Redis $redis,
+        private readonly string $prefix = 'sofinder:',
+        private readonly int $lockTtlMilliseconds = 60_000,
+        private readonly int $waitMilliseconds = 2_000,
     ) {
         if ($prefix === '' || strlen($prefix) > 128 || $lockTtlMilliseconds < 1000 || $waitMilliseconds < 0) {
             throw new \InvalidArgumentException('The Redis state-store settings are invalid.');

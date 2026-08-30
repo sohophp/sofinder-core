@@ -15,15 +15,15 @@ use SohoPHP\SoFinder\Value\Entry;
 use SohoPHP\SoFinder\Value\ResourceStorage;
 use SohoPHP\SoFinder\Value\TrashItem;
 
-final readonly class TrashManager implements RecycleBinInterface
+final class TrashManager implements RecycleBinInterface
 {
     public function __construct(
-        private string $root,
-        private ActorProviderInterface $actors,
-        private PathGuard $paths,
-        private int $retentionDays = 30,
-        private int $maxItems = 1000,
-        private int $maxBytes = 1073741824,
+        private readonly string $root,
+        private readonly ActorProviderInterface $actors,
+        private readonly PathGuard $paths,
+        private readonly int $retentionDays = 30,
+        private readonly int $maxItems = 1000,
+        private readonly int $maxBytes = 1073741824,
     ) {
     }
 

@@ -7,13 +7,13 @@ namespace SohoPHP\SoFinder\Health;
 use SohoPHP\SoFinder\Contract\HealthCheckInterface;
 use SohoPHP\SoFinder\Value\HealthCheckResult;
 
-final readonly class RuntimeHealthCheck implements HealthCheckInterface
+final class RuntimeHealthCheck implements HealthCheckInterface
 {
     /**
      * @param list<string> $directories
      * @param list<string> $assets
      */
-    public function __construct(private array $directories, private array $assets)
+    public function __construct(private readonly array $directories, private readonly array $assets)
     {
     }
 

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace SohoPHP\SoFinder\Value;
 
-final readonly class SecurityAuditResult
+final class SecurityAuditResult
 {
     /** @param list<array{severity:string,scope:string,message:string}> $findings */
-    public function __construct(public array $findings)
+    public function __construct(public readonly array $findings)
     {
     }
 

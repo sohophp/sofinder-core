@@ -13,9 +13,9 @@ use SohoPHP\SoFinder\Value\Entry;
 use SohoPHP\SoFinder\Value\RequestContext;
 use SohoPHP\SoFinder\Workspace\WorkspaceProvider;
 
-final readonly class AssetAccessSessionManager
+final class AssetAccessSessionManager
 {
-    public function __construct(private AssetCatalogInterface $catalog, private AssetAccessSessionStoreInterface $store, private WorkspaceProvider $workspaces, private FileManager $files, private ResourceRegistry $resources, private bool $enabled, private int $defaultTtl = 3600, private int $maximumTtl = 86400, private int $maximumAssets = 50, private ?\Closure $clock = null) {}
+    public function __construct(private readonly AssetCatalogInterface $catalog, private readonly AssetAccessSessionStoreInterface $store, private readonly WorkspaceProvider $workspaces, private readonly FileManager $files, private readonly ResourceRegistry $resources, private readonly bool $enabled, private readonly int $defaultTtl = 3600, private readonly int $maximumTtl = 86400, private readonly int $maximumAssets = 50, private readonly ?\Closure $clock = null) {}
 
     /**
      * @param list<string> $assetIds

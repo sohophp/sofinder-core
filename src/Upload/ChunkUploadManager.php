@@ -8,13 +8,13 @@ use SohoPHP\SoFinder\Contract\ActorProviderInterface;
 use SohoPHP\SoFinder\Contract\ChunkUploadStoreInterface;
 use SohoPHP\SoFinder\Exception\SoFinderException;
 
-final readonly class ChunkUploadManager implements ChunkUploadStoreInterface
+final class ChunkUploadManager implements ChunkUploadStoreInterface
 {
     public function __construct(
-        private string $root,
-        private ActorProviderInterface $actors,
-        private int $maximumChunkBytes = 5_242_880,
-        private int $maximumChunks = 200,
+        private readonly string $root,
+        private readonly ActorProviderInterface $actors,
+        private readonly int $maximumChunkBytes = 5_242_880,
+        private readonly int $maximumChunks = 200,
     ) {
     }
 

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace SohoPHP\SoFinder\Value;
 
-final readonly class InspectedFile
+final class InspectedFile
 {
     public function __construct(
-        public int $size,
-        public string $mimeType,
-        public ?int $imageWidth = null,
-        public ?int $imageHeight = null,
+        public readonly int $size,
+        public readonly string $mimeType,
+        public readonly ?int $imageWidth = null,
+        public readonly ?int $imageHeight = null,
     ) {
     }
 }

@@ -11,11 +11,11 @@ use SohoPHP\SoFinder\Image\ImageFormatRegistry;
 use SohoPHP\SoFinder\Value\InspectedFile;
 use SohoPHP\SoFinder\Value\ResourceType;
 
-final readonly class DefaultFileInspector implements FileInspectorInterface
+final class DefaultFileInspector implements FileInspectorInterface
 {
     public function __construct(
-        private ImageProcessorInterface $images,
-        private ImageFormatRegistry $formats = new ImageFormatRegistry(),
+        private readonly ImageProcessorInterface $images,
+        private readonly ImageFormatRegistry $formats = new ImageFormatRegistry(),
     ) {
     }
 

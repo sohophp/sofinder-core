@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SohoPHP\SoFinder\Image;
 
-final readonly class ImageFormatRegistry
+final class ImageFormatRegistry
 {
     /**
      * @var array<string, array{extensions:list<string>,mimes:list<string>,coder:string,web:bool,editable:bool}>

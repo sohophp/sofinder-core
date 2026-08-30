@@ -7,9 +7,9 @@ namespace SohoPHP\SoFinder\Asset;
 use SohoPHP\SoFinder\Contract\AssetUsageStoreInterface;
 use SohoPHP\SoFinder\Exception\SoFinderException;
 
-final readonly class JsonAssetUsageStore implements AssetUsageStoreInterface
+final class JsonAssetUsageStore implements AssetUsageStoreInterface
 {
-    public function __construct(private string $file)
+    public function __construct(private readonly string $file)
     {
     }
 

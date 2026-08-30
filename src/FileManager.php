@@ -28,23 +28,23 @@ use SohoPHP\SoFinder\Value\ResourceStorage;
 use SohoPHP\SoFinder\Value\TrashItem;
 use SohoPHP\SoFinder\Workspace\WorkspaceProvider;
 
-final readonly class FileManager
+final class FileManager
 {
-    private UploadPipeline $uploads;
-    private StoragePaginator $paginator;
+    private readonly UploadPipeline $uploads;
+    private readonly StoragePaginator $paginator;
 
     public function __construct(
-        private ResourceRegistry $resources,
-        private AuthorizationInterface $authorization,
-        private EventDispatcherInterface $events,
-        private PathGuard $pathGuard = new PathGuard(),
+        private readonly ResourceRegistry $resources,
+        private readonly AuthorizationInterface $authorization,
+        private readonly EventDispatcherInterface $events,
+        private readonly PathGuard $pathGuard = new PathGuard(),
         ?UploadPipeline $uploads = null,
-        private ?EntryUrlGeneratorInterface $entryUrls = null,
-        private ?RecycleBinInterface $trash = null,
+        private readonly ?EntryUrlGeneratorInterface $entryUrls = null,
+        private readonly ?RecycleBinInterface $trash = null,
         ?UsageTrackerInterface $usage = null,
         ?StoragePaginator $paginator = null,
-        private ?MaintenanceCoordinator $maintenance = null,
-        private ?WorkspaceProvider $workspaces = null,
+        private readonly ?MaintenanceCoordinator $maintenance = null,
+        private readonly ?WorkspaceProvider $workspaces = null,
     ) {
         $this->uploads = $uploads ?? new UploadPipeline(
             new DefaultFileInspector(new GdImageProcessor()),
@@ -54,7 +54,7 @@ final readonly class FileManager
         $this->paginator = $paginator ?? new StoragePaginator();
     }
 
-    private UsageTrackerInterface $usage;
+    private readonly UsageTrackerInterface $usage;
 
     /** @return list<array<string, mixed>> */
     public function resources(): array

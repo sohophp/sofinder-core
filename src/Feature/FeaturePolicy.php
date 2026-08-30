@@ -7,7 +7,7 @@ namespace SohoPHP\SoFinder\Feature;
 use SohoPHP\SoFinder\Exception\SoFinderException;
 
 /** Host-controlled upper bound for optional browser and HTTP capabilities. */
-final readonly class FeaturePolicy
+final class FeaturePolicy
 {
     private const FEATURES = [
         'folder_tree', 'recent', 'favorites', 'quick_access', 'quick_access_files', 'tags', 'archive', 'trash',
@@ -16,7 +16,7 @@ final readonly class FeaturePolicy
     ];
 
     /** @param array<string,bool> $features */
-    public function __construct(private array $features = [])
+    public function __construct(private readonly array $features = [])
     {
     }
 

@@ -11,22 +11,22 @@ use SohoPHP\SoFinder\Exception\SoFinderException;
 use SohoPHP\SoFinder\FileManager;
 use SohoPHP\SoFinder\Value\Entry;
 
-final readonly class ImageManager
+final class ImageManager
 {
     public function __construct(
-        private FileManager $files,
-        private ImageProcessorInterface $processor,
-        private string $cacheDirectory,
+        private readonly FileManager $files,
+        private readonly ImageProcessorInterface $processor,
+        private readonly string $cacheDirectory,
         /** @var array<string, array{width:int,height:int,quality:int}> */
-        private array $presets = [],
-        private ImageFormatRegistry $formats = new ImageFormatRegistry(),
-        private int $directoryMode = 0775,
-        private int $fileMode = 0664,
-        private bool $variantsEnabled = false,
-        /** @var list<int> */ private array $variantWidths = [320, 640, 960, 1280, 1920],
-        /** @var list<string> */ private array $variantFormats = ['original', 'webp'],
-        private int $variantQuality = 82,
-        private int $variantCacheTtl = 2_592_000,
+        private readonly array $presets = [],
+        private readonly ImageFormatRegistry $formats = new ImageFormatRegistry(),
+        private readonly int $directoryMode = 0775,
+        private readonly int $fileMode = 0664,
+        private readonly bool $variantsEnabled = false,
+        /** @var list<int> */ private readonly array $variantWidths = [320, 640, 960, 1280, 1920],
+        /** @var list<string> */ private readonly array $variantFormats = ['original', 'webp'],
+        private readonly int $variantQuality = 82,
+        private readonly int $variantCacheTtl = 2_592_000,
     ) {
     }
 

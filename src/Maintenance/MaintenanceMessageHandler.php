@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace SohoPHP\SoFinder\Maintenance;
 
-final readonly class MaintenanceMessageHandler
+final class MaintenanceMessageHandler
 {
-    public function __construct(private MaintenanceRunner $runner)
+    public function __construct(private readonly MaintenanceRunner $runner)
     {
     }
 

@@ -7,9 +7,9 @@ namespace SohoPHP\SoFinder\State;
 use SohoPHP\SoFinder\Contract\AtomicStateStoreInterface;
 use SohoPHP\SoFinder\Contract\QuickAccessMetadataStoreInterface;
 
-final readonly class SharedMetadataStore implements QuickAccessMetadataStoreInterface
+final class SharedMetadataStore implements QuickAccessMetadataStoreInterface
 {
-    public function __construct(private AtomicStateStoreInterface $state)
+    public function __construct(private readonly AtomicStateStoreInterface $state)
     {
     }
 

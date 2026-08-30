@@ -6,9 +6,9 @@ namespace SohoPHP\SoFinder\Observability;
 
 use SohoPHP\SoFinder\Contract\GaugeMetricsStoreInterface;
 
-final readonly class LocalMetricsStore implements GaugeMetricsStoreInterface
+final class LocalMetricsStore implements GaugeMetricsStoreInterface
 {
-    public function __construct(private string $file) {}
+    public function __construct(private readonly string $file) {}
 
     public function increment(string $name, array $labels = [], int $amount = 1): void
     {

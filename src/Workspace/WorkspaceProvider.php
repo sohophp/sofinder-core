@@ -10,9 +10,9 @@ use SohoPHP\SoFinder\Exception\AccessDeniedException;
 use SohoPHP\SoFinder\Value\RequestContext;
 use SohoPHP\SoFinder\Value\WorkspaceContext;
 
-final readonly class WorkspaceProvider
+final class WorkspaceProvider
 {
-    public function __construct(private WorkspaceResolverInterface $resolver, private RequestContextProviderInterface $requests)
+    public function __construct(private readonly WorkspaceResolverInterface $resolver, private readonly RequestContextProviderInterface $requests)
     {
     }
 

@@ -6,14 +6,14 @@ namespace SohoPHP\SoFinder\Event;
 
 use SohoPHP\SoFinder\Value\ResourceType;
 
-final readonly class OperationEvent
+final class OperationEvent
 {
     /** @param array<string, mixed> $context */
     public function __construct(
-        public string $operation,
-        public ResourceType $resource,
-        public string $path,
-        public array $context = [],
+        public readonly string $operation,
+        public readonly ResourceType $resource,
+        public readonly string $path,
+        public readonly array $context = [],
     ) {
     }
 }

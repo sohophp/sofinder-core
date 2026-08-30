@@ -15,17 +15,17 @@ use SohoPHP\SoFinder\Value\InspectedFile;
 use SohoPHP\SoFinder\Value\ResourceType;
 
 /** Streams quarantine files to clamd without invoking a shell command. */
-final readonly class ClamAvScanner implements UploadScannerInterface, HealthCheckInterface
+final class ClamAvScanner implements UploadScannerInterface, HealthCheckInterface
 {
     /** @param (\Closure(string,float):mixed)|null $connector Testable stream connector; omit in applications. */
     public function __construct(
-        private string $endpoint = 'tcp://127.0.0.1:3310',
-        private float $timeoutSeconds = 5.0,
-        private ?\Closure $connector = null,
-        private ?MetricsStoreInterface $metrics = null,
-        private ?MalwareScanStatusStoreInterface $statusStore = null,
-        private ?LoggerInterface $logger = null,
-        private bool $enabled = true,
+        private readonly string $endpoint = 'tcp://127.0.0.1:3310',
+        private readonly float $timeoutSeconds = 5.0,
+        private readonly ?\Closure $connector = null,
+        private readonly ?MetricsStoreInterface $metrics = null,
+        private readonly ?MalwareScanStatusStoreInterface $statusStore = null,
+        private readonly ?LoggerInterface $logger = null,
+        private readonly bool $enabled = true,
     ) {
         if (preg_match('#^(?:tcp://[A-Za-z0-9.:-]+|unix:///[^\x00-\x1F]+)$#D', $endpoint) !== 1 || $timeoutSeconds <= 0 || $timeoutSeconds > 60) {
             throw new \InvalidArgumentException('The ClamAV endpoint or timeout is invalid.');

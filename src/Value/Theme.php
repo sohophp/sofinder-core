@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace SohoPHP\SoFinder\Value;
 
-final readonly class Theme
+final class Theme
 {
     private const COLOR_KEYS = ['accent', 'background', 'panel', 'text', 'muted', 'danger'];
 
     /** @param array<string, mixed> $values */
-    public function __construct(private array $values)
+    public function __construct(private readonly array $values)
     {
         foreach (self::COLOR_KEYS as $key) {
             $value = $values[$key] ?? null;

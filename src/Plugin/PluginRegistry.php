@@ -6,10 +6,10 @@ namespace SohoPHP\SoFinder\Plugin;
 
 use SohoPHP\SoFinder\Contract\PluginInterface;
 
-final readonly class PluginRegistry
+final class PluginRegistry
 {
     /** @var list<array<string,mixed>> */
-    private array $descriptors;
+    private readonly array $descriptors;
 
     /** @param iterable<PluginInterface> $plugins */
     public function __construct(iterable $plugins)

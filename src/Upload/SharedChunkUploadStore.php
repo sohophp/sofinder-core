@@ -14,12 +14,12 @@ use SohoPHP\SoFinder\Exception\SoFinderException;
  * in the configured chunk directory. Every node must mount that directory at the
  * same path; the shared state provides the cross-node lock and resumable manifest.
  */
-final readonly class SharedChunkUploadStore implements ChunkUploadStoreInterface
+final class SharedChunkUploadStore implements ChunkUploadStoreInterface
 {
     public function __construct(
-        private ChunkUploadManager $local,
-        private AtomicStateStoreInterface $state,
-        private ActorProviderInterface $actors,
+        private readonly ChunkUploadManager $local,
+        private readonly AtomicStateStoreInterface $state,
+        private readonly ActorProviderInterface $actors,
     ) {
     }
 

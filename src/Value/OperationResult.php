@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace SohoPHP\SoFinder\Value;
 
-final readonly class OperationResult implements \JsonSerializable
+final class OperationResult implements \JsonSerializable
 {
     /** @param array<string, mixed> $data */
     private function __construct(
-        public bool $success,
-        public array $data = [],
-        public ?string $errorCode = null,
-        public ?string $message = null,
+        public readonly bool $success,
+        public readonly array $data = [],
+        public readonly ?string $errorCode = null,
+        public readonly ?string $message = null,
     ) {
     }
 

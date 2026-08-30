@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace SohoPHP\SoFinder\Value;
 
-final readonly class HealthCheckResult implements \JsonSerializable
+final class HealthCheckResult implements \JsonSerializable
 {
     public function __construct(
-        public string $name,
-        public string $status,
-        public string $message = '',
+        public readonly string $name,
+        public readonly string $status,
+        public readonly string $message = '',
     ) {
         if (preg_match('/^[a-z][a-z0-9._-]{1,63}$/D', $name) !== 1) {
             throw new \InvalidArgumentException('Health check names must contain 2-64 lowercase letters, numbers, dots, underscores or hyphens.');

@@ -9,7 +9,7 @@ use SohoPHP\SoFinder\Exception\SoFinderException;
 use SohoPHP\SoFinder\Value\Entry;
 use SohoPHP\SoFinder\Value\ListQuery;
 
-final readonly class StoragePaginator
+final class StoragePaginator
 {
     /** @return list<Entry> */
     public function all(StorageAdapterInterface $storage, ListQuery $query): array

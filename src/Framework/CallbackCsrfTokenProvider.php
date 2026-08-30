@@ -7,10 +7,10 @@ namespace SohoPHP\SoFinder\Framework;
 use SohoPHP\SoFinder\Contract\CsrfTokenProviderInterface;
 use SohoPHP\SoFinder\Value\RequestContext;
 
-final readonly class CallbackCsrfTokenProvider implements CsrfTokenProviderInterface
+final class CallbackCsrfTokenProvider implements CsrfTokenProviderInterface
 {
-    private \Closure $issuer;
-    private \Closure $validator;
+    private readonly \Closure $issuer;
+    private readonly \Closure $validator;
 
     /**
      * @param callable(RequestContext):string $issuer

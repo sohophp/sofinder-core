@@ -12,9 +12,9 @@ use SohoPHP\SoFinder\ResourceRegistry;
 use SohoPHP\SoFinder\Value\HealthCheckResult;
 use SohoPHP\SoFinder\Value\ListQuery;
 
-final readonly class StorageHealthCheck implements HealthCheckInterface
+final class StorageHealthCheck implements HealthCheckInterface
 {
-    public function __construct(private ResourceRegistry $resources, private ?MetricsStoreInterface $metrics = null)
+    public function __construct(private readonly ResourceRegistry $resources, private readonly ?MetricsStoreInterface $metrics = null)
     {
     }
 

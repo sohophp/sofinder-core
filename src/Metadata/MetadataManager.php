@@ -11,16 +11,16 @@ use SohoPHP\SoFinder\Exception\SoFinderException;
 use SohoPHP\SoFinder\FileManager;
 use SohoPHP\SoFinder\Workspace\WorkspaceProvider;
 
-final readonly class MetadataManager
+final class MetadataManager
 {
     public const MAX_QUICK_ACCESS = 12;
 
     public function __construct(
-        private FileManager $files,
-        private MetadataStoreInterface $store,
-        private ActorProviderInterface $actors,
-        private bool $allowQuickAccessFiles = false,
-        private ?WorkspaceProvider $workspaces = null,
+        private readonly FileManager $files,
+        private readonly MetadataStoreInterface $store,
+        private readonly ActorProviderInterface $actors,
+        private readonly bool $allowQuickAccessFiles = false,
+        private readonly ?WorkspaceProvider $workspaces = null,
     ) {
         // Kept in the public constructor for backward compatibility; files are no longer pinnable.
     }

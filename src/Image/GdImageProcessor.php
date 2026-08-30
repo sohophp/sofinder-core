@@ -8,13 +8,13 @@ use SohoPHP\SoFinder\Contract\ImageProcessorInterface;
 use SohoPHP\SoFinder\Contract\ImageEffectsProcessorInterface;
 use SohoPHP\SoFinder\Exception\SoFinderException;
 
-final readonly class GdImageProcessor implements ImageProcessorInterface, ImageEffectsProcessorInterface
+final class GdImageProcessor implements ImageProcessorInterface, ImageEffectsProcessorInterface
 {
     public function __construct(
-        private int $maximumPixels = 50_000_000,
-        private ImageFormatRegistry $formats = new ImageFormatRegistry(),
-        private ?string $watermarkFont = null,
-        private ?WatermarkFontResolver $watermarkFontResolver = null,
+        private readonly int $maximumPixels = 50_000_000,
+        private readonly ImageFormatRegistry $formats = new ImageFormatRegistry(),
+        private readonly ?string $watermarkFont = null,
+        private readonly ?WatermarkFontResolver $watermarkFontResolver = null,
     )
     {
     }
@@ -27,12 +27,50 @@ final readonly class GdImageProcessor implements ImageProcessorInterface, ImageE
         }
 
         return match ($format) {
-            'avif' => function_exists('imagecreatefromavif') && function_exists('imageavif'),
+            'avif' => $this->supportsAvif(),
             'webp' => function_exists('imagecreatefromwebp') && function_exists('imagewebp'),
             'bmp' => function_exists('imagecreatefrombmp') && function_exists('imagebmp'),
             'jpeg', 'png', 'gif' => true,
             default => false,
         };
+    }
+
+    private function supportsAvif(): bool
+    {
+        static $supported;
+        if (is_bool($supported)) {
+            return $supported;
+        }
+        if (!function_exists('imagecreatefromavif') || !function_exists('imageavif')) {
+            return $supported = false;
+        }
+
+        $path = tempnam(sys_get_temp_dir(), 'sofinder-avif-probe-');
+        $source = imagecreatetruecolor(8, 4);
+        if ($path === false || $source === false) {
+            if (is_string($path)) {
+                @unlink($path);
+            }
+
+            return $supported = false;
+        }
+
+        try {
+            $encoded = @imageavif($source, $path, 80);
+            $decoded = $encoded ? @imagecreatefromavif($path) : false;
+            $info = $encoded ? @getimagesize($path) : false;
+            $supported = $decoded instanceof \GdImage
+                && imagesx($decoded) === 8
+                && imagesy($decoded) === 4
+                && is_array($info)
+                && [$info[0], $info[1]] === [8, 4];
+            unset($decoded);
+
+            return $supported;
+        } finally {
+            unset($source);
+            @unlink($path);
+        }
     }
 
     public function dimensions(string $source): array

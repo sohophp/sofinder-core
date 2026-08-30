@@ -283,7 +283,7 @@ final class ConfigurationNormalizer
             throw new \InvalidArgumentException('SoFinder malware_scanning.timeout_seconds must be between 0.1 and 60.');
         }
         $this->integerRange($config, 'malware_scanning.history_limit', 1, 1000);
-        if (!is_string($config['malware_scanning']['endpoint']) || preg_match('#^(?:tcp://[A-Za-z0-9.:-]+|unix:///[^ -]+)$#D', $config['malware_scanning']['endpoint']) !== 1) {
+        if (!is_string($config['malware_scanning']['endpoint']) || preg_match('#^(?:tcp://[A-Za-z0-9.:-]+|unix:///[^\x00-\x1F]+)$#D', $config['malware_scanning']['endpoint']) !== 1) {
             throw new \InvalidArgumentException('SoFinder malware_scanning.endpoint must be a tcp:// host or absolute unix:/// socket.');
         }
         foreach (['directory_mode' => '/^0?[0-3]?[0-7]{3}$/D', 'file_mode' => '/^0?[0-7]{3}$/D'] as $key => $pattern) {

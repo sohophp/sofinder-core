@@ -10,10 +10,10 @@ use SohoPHP\SoFinder\Contract\QueueTelemetryProviderInterface;
 use SohoPHP\SoFinder\Contract\GaugeMetricsStoreInterface;
 use SohoPHP\SoFinder\Value\HealthCheckResult;
 
-final readonly class MaintenanceQueueHealthCheck implements HealthCheckInterface
+final class MaintenanceQueueHealthCheck implements HealthCheckInterface
 {
     /** @param iterable<QueueHealthProviderInterface> $providers */
-    public function __construct(private string $mode, private bool $dispatcherAvailable, private iterable $providers = [], private ?GaugeMetricsStoreInterface $metrics = null) {}
+    public function __construct(private readonly string $mode, private readonly bool $dispatcherAvailable, private readonly iterable $providers = [], private readonly ?GaugeMetricsStoreInterface $metrics = null) {}
 
     public function check(): HealthCheckResult
     {

@@ -6,9 +6,9 @@ namespace SohoPHP\SoFinder\Maintenance;
 
 use SohoPHP\SoFinder\Preview\DocumentPreviewJobManager;
 
-final readonly class CacheCleaner
+final class CacheCleaner
 {
-    public function __construct(private string $cacheDirectory, private ?DocumentPreviewJobManager $documentPreviews = null)
+    public function __construct(private readonly string $cacheDirectory, private readonly ?DocumentPreviewJobManager $documentPreviews = null)
     {
     }
 

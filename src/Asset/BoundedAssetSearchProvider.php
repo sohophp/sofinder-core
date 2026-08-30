@@ -15,12 +15,12 @@ use SohoPHP\SoFinder\Value\Entry;
 use SohoPHP\SoFinder\Value\WorkspaceContext;
 
 /** Safe fallback for installations without an indexed search plugin. */
-final readonly class BoundedAssetSearchProvider implements AssetSearchProviderInterface
+final class BoundedAssetSearchProvider implements AssetSearchProviderInterface
 {
     public function __construct(
-        private FileManager $files,
-        private AssetCatalogInterface $catalog,
-        private int $maximumScannedEntries = 10000,
+        private readonly FileManager $files,
+        private readonly AssetCatalogInterface $catalog,
+        private readonly int $maximumScannedEntries = 10000,
     ) {
         if ($this->maximumScannedEntries < 100 || $this->maximumScannedEntries > 100000) {
             throw new \InvalidArgumentException('The asset search scan limit must be between 100 and 100000.');

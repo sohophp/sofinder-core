@@ -6,7 +6,7 @@ namespace SohoPHP\SoFinder\Value;
 
 use SohoPHP\SoFinder\Exception\SoFinderException;
 
-final readonly class ResourceType implements \JsonSerializable
+final class ResourceType implements \JsonSerializable
 {
     /**
      * @param list<string> $allowedExtensions
@@ -17,34 +17,34 @@ final readonly class ResourceType implements \JsonSerializable
      * @param list<array{path:string,operations:list<string>,roles:list<string>,allow:bool}> $pathAcl
      */
     public function __construct(
-        public string $name,
-        public string $root,
-        public string $publicUrl,
-        public array $allowedExtensions = [],
-        public array $deniedExtensions = [],
-        public array $allowedMimeTypes = [],
-        public int $maxSize = 20_971_520,
-        public bool $readOnly = false,
-        public int $quotaBytes = 0,
-        public array $requiredRoles = [],
-        public array $operationRoles = [],
-        public int $maxFileNameLength = 120,
-        public int $maxFolderNameLength = 50,
-        public int $maxFolderDepth = 5,
-        public int $maxImagePixels = 50_000_000,
-        public array $pathAcl = [],
-        public string $deliveryMode = 'public',
-        public int $maxBatchItems = 100,
-        public int $maxRecursiveItems = 10_000,
-        public int $maxArchiveItems = 1_000,
-        public int $maxArchiveBytes = 536_870_912,
-        public int $maxImageWidth = 12_000,
-        public int $maxImageHeight = 12_000,
-        public string $animatedImagePolicy = 'preserve',
-        public string $entryUrlRoute = '',
+        public readonly string $name,
+        public readonly string $root,
+        public readonly string $publicUrl,
+        public readonly array $allowedExtensions = [],
+        public readonly array $deniedExtensions = [],
+        public readonly array $allowedMimeTypes = [],
+        public readonly int $maxSize = 20_971_520,
+        public readonly bool $readOnly = false,
+        public readonly int $quotaBytes = 0,
+        public readonly array $requiredRoles = [],
+        public readonly array $operationRoles = [],
+        public readonly int $maxFileNameLength = 120,
+        public readonly int $maxFolderNameLength = 50,
+        public readonly int $maxFolderDepth = 5,
+        public readonly int $maxImagePixels = 50_000_000,
+        public readonly array $pathAcl = [],
+        public readonly string $deliveryMode = 'public',
+        public readonly int $maxBatchItems = 100,
+        public readonly int $maxRecursiveItems = 10_000,
+        public readonly int $maxArchiveItems = 1_000,
+        public readonly int $maxArchiveBytes = 536_870_912,
+        public readonly int $maxImageWidth = 12_000,
+        public readonly int $maxImageHeight = 12_000,
+        public readonly string $animatedImagePolicy = 'preserve',
+        public readonly string $entryUrlRoute = '',
         /** @var array<string, string> */
-        public array $entryUrlParameters = [],
-        public bool $entryUrlAbsolute = false,
+        public readonly array $entryUrlParameters = [],
+        public readonly bool $entryUrlAbsolute = false,
     ) {
         if ($name === '' || $root === '') {
             throw new \InvalidArgumentException('Resource name and root are required.');

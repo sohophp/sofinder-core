@@ -11,20 +11,20 @@ use SohoPHP\SoFinder\Value\Entry;
 use SohoPHP\SoFinder\Value\RequestContext;
 use SohoPHP\SoFinder\Workspace\WorkspaceProvider;
 
-final readonly class AssetReferenceBuilder
+final class AssetReferenceBuilder
 {
     /** @param list<int> $variantWidths
      * @param list<string> $variantFormats
      */
     public function __construct(
-        private EndpointUrlGeneratorInterface $urls,
-        private WorkspaceProvider $workspaces,
-        private ?AssetCatalogInterface $catalog = null,
-        private ?ImageManager $images = null,
-        private bool $catalogEnabled = false,
-        private bool $variantsEnabled = false,
-        private array $variantWidths = [],
-        private array $variantFormats = [],
+        private readonly EndpointUrlGeneratorInterface $urls,
+        private readonly WorkspaceProvider $workspaces,
+        private readonly ?AssetCatalogInterface $catalog = null,
+        private readonly ?ImageManager $images = null,
+        private readonly bool $catalogEnabled = false,
+        private readonly bool $variantsEnabled = false,
+        private readonly array $variantWidths = [],
+        private readonly array $variantFormats = [],
     ) {
     }
 

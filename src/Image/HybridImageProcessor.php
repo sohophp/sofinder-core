@@ -9,13 +9,13 @@ use SohoPHP\SoFinder\Contract\ImageCapabilityProviderInterface;
 use SohoPHP\SoFinder\Contract\ImageEffectsProcessorInterface;
 use SohoPHP\SoFinder\Exception\SoFinderException;
 
-final readonly class HybridImageProcessor implements ImageProcessorInterface, ImageCapabilityProviderInterface, ImageEffectsProcessorInterface
+final class HybridImageProcessor implements ImageProcessorInterface, ImageCapabilityProviderInterface, ImageEffectsProcessorInterface
 {
     public function __construct(
-        private ImageFormatRegistry $formats,
-        private GdImageProcessor $gd,
-        private ImagickImageProcessor $imagick,
-        private string $driver = 'auto',
+        private readonly ImageFormatRegistry $formats,
+        private readonly GdImageProcessor $gd,
+        private readonly ImagickImageProcessor $imagick,
+        private readonly string $driver = 'auto',
     ) {
         if (!in_array($driver, ['auto', 'gd', 'imagick'], true)) {
             throw new \InvalidArgumentException('Image processor driver must be auto, gd or imagick.');

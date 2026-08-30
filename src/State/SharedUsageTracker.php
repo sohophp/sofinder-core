@@ -10,9 +10,9 @@ use SohoPHP\SoFinder\Contract\UsageTrackerInterface;
 use SohoPHP\SoFinder\Exception\SoFinderException;
 use SohoPHP\SoFinder\Value\ResourceStorage;
 
-final readonly class SharedUsageTracker implements UsageTrackerInterface
+final class SharedUsageTracker implements UsageTrackerInterface
 {
-    public function __construct(private AtomicStateStoreInterface $state)
+    public function __construct(private readonly AtomicStateStoreInterface $state)
     {
     }
 

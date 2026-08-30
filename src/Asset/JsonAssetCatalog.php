@@ -11,9 +11,9 @@ use SohoPHP\SoFinder\Exception\SoFinderException;
 use SohoPHP\SoFinder\Value\AssetRecord;
 use SohoPHP\SoFinder\Value\Entry;
 
-final readonly class JsonAssetCatalog implements AssetCatalogInterface, LocalizedAssetMetadataCatalogInterface
+final class JsonAssetCatalog implements AssetCatalogInterface, LocalizedAssetMetadataCatalogInterface
 {
-    public function __construct(private string $file)
+    public function __construct(private readonly string $file)
     {
     }
 
@@ -47,7 +47,7 @@ final readonly class JsonAssetCatalog implements AssetCatalogInterface, Localize
 
     public function move(string $workspace, string $resource, string $source, string $destination): void
     {
-        $this->mutate(function (array &$data) use ($workspace, $resource, $source, $destination): null {
+        $this->mutate(function (array &$data) use ($workspace, $resource, $source, $destination): mixed {
             foreach ($data['assets'] as $id => &$asset) {
                 if (!is_array($asset) || ($asset['workspace'] ?? null) !== $workspace || ($asset['resource'] ?? null) !== $resource || !is_string($asset['path'] ?? null) || ($asset['path'] !== $source && !str_starts_with($asset['path'], $source . '/'))) continue;
                 $oldPath = $asset['path']; $newPath = $destination . substr($oldPath, strlen($source)); unset($data['paths'][$this->key($workspace, $resource, $oldPath)]); $data['paths'][$this->key($workspace, $resource, $newPath)] = $id; $asset['path'] = $newPath; $asset['updatedAt'] = time();
@@ -59,7 +59,7 @@ final readonly class JsonAssetCatalog implements AssetCatalogInterface, Localize
 
     public function delete(string $workspace, string $resource, string $path, bool $retainIdentity = false): void
     {
-        $this->mutate(function (array &$data) use ($workspace, $resource, $path, $retainIdentity): null {
+        $this->mutate(function (array &$data) use ($workspace, $resource, $path, $retainIdentity): mixed {
             foreach ($data['assets'] as &$asset) if (is_array($asset) && ($asset['workspace'] ?? null) === $workspace && ($asset['resource'] ?? null) === $resource && is_string($asset['path'] ?? null) && ($asset['path'] === $path || str_starts_with($asset['path'], $path . '/'))) { $asset['deleted'] = true; $asset['updatedAt'] = time(); if (!$retainIdentity) unset($data['paths'][$this->key($workspace, $resource, $asset['path'])]); }
             unset($asset);
             return null;
@@ -68,7 +68,7 @@ final readonly class JsonAssetCatalog implements AssetCatalogInterface, Localize
 
     public function restore(string $workspace, string $resource, string $path): void
     {
-        $this->mutate(function (array &$data) use ($workspace, $resource, $path): null {
+        $this->mutate(function (array &$data) use ($workspace, $resource, $path): mixed {
             foreach ($data['assets'] as &$asset) if (is_array($asset) && ($asset['workspace'] ?? null) === $workspace && ($asset['resource'] ?? null) === $resource && is_string($asset['path'] ?? null) && ($asset['path'] === $path || str_starts_with($asset['path'], $path . '/'))) { $asset['deleted'] = false; $asset['updatedAt'] = time(); }
             unset($asset);
             return null;

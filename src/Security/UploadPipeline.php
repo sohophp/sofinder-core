@@ -10,13 +10,13 @@ use SohoPHP\SoFinder\Exception\SoFinderException;
 use SohoPHP\SoFinder\Value\InspectedFile;
 use SohoPHP\SoFinder\Value\ResourceType;
 
-final readonly class UploadPipeline
+final class UploadPipeline
 {
     public function __construct(
-        private FileInspectorInterface $inspector,
-        private string $quarantineDirectory,
+        private readonly FileInspectorInterface $inspector,
+        private readonly string $quarantineDirectory,
         /** @var iterable<UploadScannerInterface> */
-        private iterable $scanners = [],
+        private readonly iterable $scanners = [],
     ) {
     }
 

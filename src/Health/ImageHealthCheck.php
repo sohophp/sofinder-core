@@ -10,12 +10,12 @@ use SohoPHP\SoFinder\Image\ImageFormatRegistry;
 use SohoPHP\SoFinder\ResourceRegistry;
 use SohoPHP\SoFinder\Value\HealthCheckResult;
 
-final readonly class ImageHealthCheck implements HealthCheckInterface
+final class ImageHealthCheck implements HealthCheckInterface
 {
     public function __construct(
-        private ImageCapabilityProviderInterface $images,
-        private ImageFormatRegistry $formats,
-        private ResourceRegistry $resources,
+        private readonly ImageCapabilityProviderInterface $images,
+        private readonly ImageFormatRegistry $formats,
+        private readonly ResourceRegistry $resources,
     ) {
     }
 

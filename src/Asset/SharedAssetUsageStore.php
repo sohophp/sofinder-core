@@ -7,9 +7,9 @@ namespace SohoPHP\SoFinder\Asset;
 use SohoPHP\SoFinder\Contract\AssetUsageStoreInterface;
 use SohoPHP\SoFinder\Contract\AtomicStateStoreInterface;
 
-final readonly class SharedAssetUsageStore implements AssetUsageStoreInterface
+final class SharedAssetUsageStore implements AssetUsageStoreInterface
 {
-    public function __construct(private AtomicStateStoreInterface $state)
+    public function __construct(private readonly AtomicStateStoreInterface $state)
     {
     }
 

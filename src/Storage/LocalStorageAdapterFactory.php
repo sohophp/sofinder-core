@@ -9,12 +9,12 @@ use SohoPHP\SoFinder\Contract\StorageAdapterInterface;
 use SohoPHP\SoFinder\Security\PathGuard;
 use SohoPHP\SoFinder\Value\ResourceType;
 
-final readonly class LocalStorageAdapterFactory implements StorageAdapterFactoryInterface
+final class LocalStorageAdapterFactory implements StorageAdapterFactoryInterface
 {
     public function __construct(
-        private PathGuard $pathGuard = new PathGuard(),
-        private int $directoryMode = 0775,
-        private int $fileMode = 0664,
+        private readonly PathGuard $pathGuard = new PathGuard(),
+        private readonly int $directoryMode = 0775,
+        private readonly int $fileMode = 0664,
     )
     {
     }

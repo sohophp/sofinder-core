@@ -10,19 +10,19 @@ use SohoPHP\SoFinder\Contract\DocumentPreviewDispatcherInterface;
 use SohoPHP\SoFinder\Contract\MetricsStoreInterface;
 use SohoPHP\SoFinder\Exception\SoFinderException;
 
-final readonly class DocumentPreviewJobManager
+final class DocumentPreviewJobManager
 {
     public function __construct(
-        private DocumentPreviewManager $previews,
-        private ActorProviderInterface $actors,
-        private string $stateFile,
-        private string $mode = 'auto',
-        private int $jobTtlSeconds = 86400,
-        private int $cacheTtlSeconds = 604800,
-        private ?DocumentPreviewDispatcherInterface $dispatcher = null,
-        private ?AtomicStateStoreInterface $state = null,
-        private ?MetricsStoreInterface $metrics = null,
-        private ?\Closure $clock = null,
+        private readonly DocumentPreviewManager $previews,
+        private readonly ActorProviderInterface $actors,
+        private readonly string $stateFile,
+        private readonly string $mode = 'auto',
+        private readonly int $jobTtlSeconds = 86400,
+        private readonly int $cacheTtlSeconds = 604800,
+        private readonly ?DocumentPreviewDispatcherInterface $dispatcher = null,
+        private readonly ?AtomicStateStoreInterface $state = null,
+        private readonly ?MetricsStoreInterface $metrics = null,
+        private readonly ?\Closure $clock = null,
     ) {
         if (!in_array($mode, ['auto', 'inline', 'messenger'], true) || $jobTtlSeconds < 60 || $cacheTtlSeconds < 60) throw new \InvalidArgumentException('The document preview job configuration is invalid.');
         if ($mode === 'messenger' && !$this->hasDispatcher()) throw new \InvalidArgumentException('Document preview messenger mode requires an available document preview dispatcher.');

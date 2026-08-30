@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SohoPHP\SoFinder\Value;
 
 /** Trusted, framework-independent request facts exposed to host integrations. */
-final readonly class RequestContext
+final class RequestContext
 {
     /**
      * @param array<string, string|list<string>> $headers
@@ -13,11 +13,11 @@ final readonly class RequestContext
      * @param array<string, mixed> $attributes
      */
     public function __construct(
-        public array $headers = [],
-        public array $query = [],
-        public array $attributes = [],
-        public string $basePath = '',
-        public string $schemeAndHost = '',
+        public readonly array $headers = [],
+        public readonly array $query = [],
+        public readonly array $attributes = [],
+        public readonly string $basePath = '',
+        public readonly string $schemeAndHost = '',
     ) {
     }
 

@@ -3,7 +3,7 @@
 Framework-independent file management, storage, metadata, security, image,
 maintenance and value contracts for SoFinder.
 
-This package supports PHP 8.2–8.5 and deliberately does not install Symfony,
+This package supports PHP 8.1–8.5 and deliberately does not install Symfony,
 Laravel, Slim or Mezzio. Install it directly for a headless/domain-only host:
 
 ```bash

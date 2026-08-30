@@ -6,11 +6,11 @@ namespace SohoPHP\SoFinder\Value;
 
 use SohoPHP\SoFinder\Contract\StorageAdapterInterface;
 
-final readonly class ResourceStorage
+final class ResourceStorage
 {
     public function __construct(
-        public ResourceType $resource,
-        public StorageAdapterInterface $storage,
+        public readonly ResourceType $resource,
+        public readonly StorageAdapterInterface $storage,
     ) {
     }
 }

@@ -9,17 +9,17 @@ use SohoPHP\SoFinder\FileManager;
 use SohoPHP\SoFinder\ResourceRegistry;
 use SohoPHP\SoFinder\Value\Entry;
 
-final readonly class SignedUrlManager
+final class SignedUrlManager
 {
     public function __construct(
-        private FileManager $files,
-        private ResourceRegistry $resources,
-        private PathGuard $paths,
-        private bool $enabled,
-        private string $secret,
-        private int $defaultTtlSeconds = 300,
-        private int $maxTtlSeconds = 3600,
-        private ?\Closure $clock = null,
+        private readonly FileManager $files,
+        private readonly ResourceRegistry $resources,
+        private readonly PathGuard $paths,
+        private readonly bool $enabled,
+        private readonly string $secret,
+        private readonly int $defaultTtlSeconds = 300,
+        private readonly int $maxTtlSeconds = 3600,
+        private readonly ?\Closure $clock = null,
     ) {
         if ($this->enabled && strlen($this->secret) < 32) {
             throw new \InvalidArgumentException('SoFinder signed_urls.secret must contain at least 32 bytes when signed URLs are enabled.');

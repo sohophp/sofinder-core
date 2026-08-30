@@ -7,9 +7,9 @@ namespace SohoPHP\SoFinder\Security;
 use SohoPHP\SoFinder\Contract\RequestGateStoreInterface;
 use SohoPHP\SoFinder\Exception\SoFinderException;
 
-final readonly class LocalRequestGateStore implements RequestGateStoreInterface
+final class LocalRequestGateStore implements RequestGateStoreInterface
 {
-    public function __construct(private string $directory)
+    public function __construct(private readonly string $directory)
     {
     }
 

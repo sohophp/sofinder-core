@@ -13,27 +13,27 @@ use SohoPHP\SoFinder\Image\ImageFormatRegistry;
 use SohoPHP\SoFinder\ResourceRegistry;
 use SohoPHP\SoFinder\Value\SecurityAuditResult;
 
-final readonly class SecurityAuditor
+final class SecurityAuditor
 {
     /** @var list<string> */
     private const EXECUTABLE_EXTENSIONS = ['cgi', 'html', 'htm', 'js', 'mjs', 'phar', 'php', 'php3', 'php4', 'php5', 'phtml', 'pl', 'py', 'sh'];
 
     public function __construct(
-        private ResourceRegistry $resources,
-        private string $projectDirectory,
-        private string $quarantineDirectory,
-        private string $chunkDirectory,
-        private string $trashDirectory,
-        private ?ImageCapabilityProviderInterface $images = null,
-        private ?ImageFormatRegistry $imageFormats = null,
-        private bool $malwareScanningEnabled = false,
-        private ?HealthCheckInterface $malwareScanner = null,
-        private bool $clusterStateConfigured = false,
-        private bool $sharedPreviewCache = false,
-        private string $documentPreviewMode = 'inline',
-        private bool $officePreviewEnabled = false,
+        private readonly ResourceRegistry $resources,
+        private readonly string $projectDirectory,
+        private readonly string $quarantineDirectory,
+        private readonly string $chunkDirectory,
+        private readonly string $trashDirectory,
+        private readonly ?ImageCapabilityProviderInterface $images = null,
+        private readonly ?ImageFormatRegistry $imageFormats = null,
+        private readonly bool $malwareScanningEnabled = false,
+        private readonly ?HealthCheckInterface $malwareScanner = null,
+        private readonly bool $clusterStateConfigured = false,
+        private readonly bool $sharedPreviewCache = false,
+        private readonly string $documentPreviewMode = 'inline',
+        private readonly bool $officePreviewEnabled = false,
         /** @var iterable<WorkspaceStorageAuditProviderInterface> */
-        private iterable $workspaceStorageAuditProviders = [],
+        private readonly iterable $workspaceStorageAuditProviders = [],
     ) {
     }
 

@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace SohoPHP\SoFinder\Value;
 
-final readonly class Entry implements \JsonSerializable
+final class Entry implements \JsonSerializable
 {
     public function __construct(
-        public string $path,
-        public string $name,
-        public bool $directory,
-        public int $size,
-        public int $modifiedAt,
-        public ?string $mimeType = null,
-        public ?string $url = null,
+        public readonly string $path,
+        public readonly string $name,
+        public readonly bool $directory,
+        public readonly int $size,
+        public readonly int $modifiedAt,
+        public readonly ?string $mimeType = null,
+        public readonly ?string $url = null,
         /** @var array<string, bool> */
-        public array $capabilities = [],
+        public readonly array $capabilities = [],
     ) {
     }
 

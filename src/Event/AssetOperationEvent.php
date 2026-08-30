@@ -7,22 +7,22 @@ namespace SohoPHP\SoFinder\Event;
 use SohoPHP\SoFinder\Value\ResourceType;
 use SohoPHP\SoFinder\Value\WorkspaceContext;
 
-final readonly class AssetOperationEvent implements \JsonSerializable
+final class AssetOperationEvent implements \JsonSerializable
 {
     public const SCHEMA_VERSION = '1.0';
     public const OPERATIONS = ['upload', 'overwrite', 'rename', 'copy', 'move', 'delete', 'restore', 'image.process', 'metadata.update'];
 
     /** @param array<string,mixed> $attributes */
     public function __construct(
-        public string $operationId,
-        public string $operation,
-        public string $phase,
-        public WorkspaceContext $workspace,
-        public ResourceType $resource,
-        public string $path,
-        public ?string $sourcePath,
-        public ?string $assetId,
-        public array $attributes = [],
+        public readonly string $operationId,
+        public readonly string $operation,
+        public readonly string $phase,
+        public readonly WorkspaceContext $workspace,
+        public readonly ResourceType $resource,
+        public readonly string $path,
+        public readonly ?string $sourcePath,
+        public readonly ?string $assetId,
+        public readonly array $attributes = [],
     ) {
         if (preg_match('/^[a-f0-9]{32}$/D', $operationId) !== 1) throw new \InvalidArgumentException('Asset event operation ID is invalid.');
         if (!in_array($operation, self::OPERATIONS, true)) throw new \InvalidArgumentException('Asset event operation is invalid.');

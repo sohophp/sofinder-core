@@ -7,9 +7,9 @@ namespace SohoPHP\SoFinder\Health;
 use SohoPHP\SoFinder\Contract\HealthCheckInterface;
 use SohoPHP\SoFinder\Value\HealthCheckResult;
 
-final readonly class DocumentPreviewHealthCheck implements HealthCheckInterface
+final class DocumentPreviewHealthCheck implements HealthCheckInterface
 {
-    public function __construct(private bool $pdfEnabled, private bool $officeEnabled, private string $officeBinary) {}
+    public function __construct(private readonly bool $pdfEnabled, private readonly bool $officeEnabled, private readonly string $officeBinary) {}
 
     public function check(): HealthCheckResult
     {

@@ -11,15 +11,15 @@ use SohoPHP\SoFinder\Value\Entry;
 use SohoPHP\SoFinder\Value\ResourceType;
 
 /** Shared entry URL policy with a host-owned named-route callback. */
-final readonly class RoutingEntryUrlGenerator implements EntryUrlGeneratorInterface
+final class RoutingEntryUrlGenerator implements EntryUrlGeneratorInterface
 {
-    private \Closure $routes;
+    private readonly \Closure $routes;
 
     /**
      * @param callable(string,array<string,string|int|float|bool|null>,bool):string $routes
      * @param iterable<EntryUrlContextProviderInterface> $contextProviders
      */
-    public function __construct(callable $routes, private iterable $contextProviders = [])
+    public function __construct(callable $routes, private readonly iterable $contextProviders = [])
     {
         $this->routes = \Closure::fromCallable($routes);
     }

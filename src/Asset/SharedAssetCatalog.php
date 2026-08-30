@@ -12,9 +12,9 @@ use SohoPHP\SoFinder\Exception\SoFinderException;
 use SohoPHP\SoFinder\Value\AssetRecord;
 use SohoPHP\SoFinder\Value\Entry;
 
-final readonly class SharedAssetCatalog implements AssetCatalogInterface, LocalizedAssetMetadataCatalogInterface
+final class SharedAssetCatalog implements AssetCatalogInterface, LocalizedAssetMetadataCatalogInterface
 {
-    public function __construct(private AtomicStateStoreInterface $state)
+    public function __construct(private readonly AtomicStateStoreInterface $state)
     {
     }
 

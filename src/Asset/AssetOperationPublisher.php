@@ -12,9 +12,9 @@ use SohoPHP\SoFinder\ResourceRegistry;
 use SohoPHP\SoFinder\Workspace\WorkspaceProvider;
 use SohoPHP\SoFinder\Value\RequestContext;
 
-final readonly class AssetOperationPublisher
+final class AssetOperationPublisher
 {
-    public function __construct(private EventDispatcherInterface $events, private WorkspaceProvider $workspaces, private ResourceRegistry $resources, private AssetCatalogInterface $assets, private bool $assetsEnabled)
+    public function __construct(private readonly EventDispatcherInterface $events, private readonly WorkspaceProvider $workspaces, private readonly ResourceRegistry $resources, private readonly AssetCatalogInterface $assets, private readonly bool $assetsEnabled)
     {
     }
 

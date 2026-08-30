@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace SohoPHP\SoFinder\Upload;
 
-final readonly class UploadNamePolicy
+final class UploadNamePolicy
 {
-    public function __construct(private bool $lowercaseExtensions = true)
+    public function __construct(private readonly bool $lowercaseExtensions = true)
     {
     }
 

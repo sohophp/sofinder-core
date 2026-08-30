@@ -12,12 +12,12 @@ use SohoPHP\SoFinder\Value\ResourceStorage;
 use SohoPHP\SoFinder\Value\WorkspaceContext;
 
 /** Framework-neutral single-workspace resolver used by default host integrations. */
-final readonly class DefaultWorkspaceResolver implements WorkspaceResolverInterface
+final class DefaultWorkspaceResolver implements WorkspaceResolverInterface
 {
     public function __construct(
-        private ActorProviderInterface $actors,
-        private ResourceRegistry $resources,
-        private string $default = 'main',
+        private readonly ActorProviderInterface $actors,
+        private readonly ResourceRegistry $resources,
+        private readonly string $default = 'main',
     ) {
     }
 

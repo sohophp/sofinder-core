@@ -11,15 +11,15 @@ use SohoPHP\SoFinder\Contract\UsageTrackerInterface;
 use SohoPHP\SoFinder\ResourceRegistry;
 use SohoPHP\SoFinder\Exception\SoFinderException;
 
-final readonly class MaintenanceRunner
+final class MaintenanceRunner
 {
     public function __construct(
-        private string $directory,
-        private ChunkUploadStoreInterface $chunks,
-        private RecycleBinInterface $trash,
-        private UsageTrackerInterface $usage,
-        private ResourceRegistry $resources,
-        private ?AtomicStateStoreInterface $state = null,
+        private readonly string $directory,
+        private readonly ChunkUploadStoreInterface $chunks,
+        private readonly RecycleBinInterface $trash,
+        private readonly UsageTrackerInterface $usage,
+        private readonly ResourceRegistry $resources,
+        private readonly ?AtomicStateStoreInterface $state = null,
     ) {
     }
 

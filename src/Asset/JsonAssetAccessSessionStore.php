@@ -7,9 +7,9 @@ namespace SohoPHP\SoFinder\Asset;
 use SohoPHP\SoFinder\Contract\AssetAccessSessionStoreInterface;
 use SohoPHP\SoFinder\Exception\SoFinderException;
 
-final readonly class JsonAssetAccessSessionStore implements AssetAccessSessionStoreInterface
+final class JsonAssetAccessSessionStore implements AssetAccessSessionStoreInterface
 {
-    public function __construct(private string $directory)
+    public function __construct(private readonly string $directory)
     {
     }
     public function put(string $id, array $session): void { $this->ensure(); $json = json_encode($session, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES); if (file_put_contents($this->file($id), $json, LOCK_EX) === false) throw new SoFinderException('Unable to save the asset access session.', 'asset_access_session_failed', 500); }

@@ -7,10 +7,10 @@ namespace SohoPHP\SoFinder\Health;
 use SohoPHP\SoFinder\Contract\HealthCheckInterface;
 use SohoPHP\SoFinder\Value\HealthCheckResult;
 
-final readonly class HealthManager
+final class HealthManager
 {
     /** @param iterable<HealthCheckInterface> $checks */
-    public function __construct(private iterable $checks)
+    public function __construct(private readonly iterable $checks)
     {
     }
 

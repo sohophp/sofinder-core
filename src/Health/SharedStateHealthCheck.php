@@ -8,9 +8,9 @@ use SohoPHP\SoFinder\Contract\AtomicStateStoreInterface;
 use SohoPHP\SoFinder\Contract\HealthCheckInterface;
 use SohoPHP\SoFinder\Value\HealthCheckResult;
 
-final readonly class SharedStateHealthCheck implements HealthCheckInterface
+final class SharedStateHealthCheck implements HealthCheckInterface
 {
-    public function __construct(private AtomicStateStoreInterface $state)
+    public function __construct(private readonly AtomicStateStoreInterface $state)
     {
     }
 

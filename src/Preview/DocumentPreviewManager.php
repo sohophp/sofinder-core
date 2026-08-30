@@ -8,19 +8,19 @@ use SohoPHP\SoFinder\Exception\SoFinderException;
 use SohoPHP\SoFinder\FileManager;
 use SohoPHP\SoFinder\Contract\MetricsStoreInterface;
 
-final readonly class DocumentPreviewManager
+final class DocumentPreviewManager
 {
     private const OFFICE_EXTENSIONS = ['doc', 'docx', 'odt', 'rtf', 'xls', 'xlsx', 'ods', 'ppt', 'pptx', 'odp'];
 
     public function __construct(
-        private FileManager $files,
-        private string $cacheDirectory,
-        private bool $pdfEnabled = true,
-        private bool $officeEnabled = false,
-        private string $officeBinary = '/usr/bin/libreoffice',
-        private int $timeoutSeconds = 30,
-        private int $maximumBytes = 52_428_800,
-        private ?MetricsStoreInterface $metrics = null,
+        private readonly FileManager $files,
+        private readonly string $cacheDirectory,
+        private readonly bool $pdfEnabled = true,
+        private readonly bool $officeEnabled = false,
+        private readonly string $officeBinary = '/usr/bin/libreoffice',
+        private readonly int $timeoutSeconds = 30,
+        private readonly int $maximumBytes = 52_428_800,
+        private readonly ?MetricsStoreInterface $metrics = null,
     ) {
     }
 

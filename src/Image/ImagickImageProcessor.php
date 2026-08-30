@@ -10,13 +10,13 @@ use SohoPHP\SoFinder\Exception\SoFinderException;
 use SohoPHP\SoFinder\Value\ImageProcessingLimits;
 
 /** Optional processor that only permits raster coders declared by ImageFormatRegistry. */
-final readonly class ImagickImageProcessor implements ImageProcessorInterface, ImageEffectsProcessorInterface
+final class ImagickImageProcessor implements ImageProcessorInterface, ImageEffectsProcessorInterface
 {
     public function __construct(
-        private ImageFormatRegistry $formats = new ImageFormatRegistry(),
-        private ImageProcessingLimits $limits = new ImageProcessingLimits(),
-        private ?string $watermarkFont = null,
-        private ?WatermarkFontResolver $watermarkFontResolver = null,
+        private readonly ImageFormatRegistry $formats = new ImageFormatRegistry(),
+        private readonly ImageProcessingLimits $limits = new ImageProcessingLimits(),
+        private readonly ?string $watermarkFont = null,
+        private readonly ?WatermarkFontResolver $watermarkFontResolver = null,
     ) {
     }
 

@@ -8,12 +8,12 @@ use SohoPHP\SoFinder\Exception\SoFinderException;
 use SohoPHP\SoFinder\Contract\StorageAdapterInterface;
 use SohoPHP\SoFinder\ResourceRegistry;
 
-final readonly class MetadataRepairer
+final class MetadataRepairer
 {
     public function __construct(
-        private string $file,
-        private ResourceRegistry $resources,
-        private bool $localStoreActive = true,
+        private readonly string $file,
+        private readonly ResourceRegistry $resources,
+        private readonly bool $localStoreActive = true,
     ) {
     }
 
