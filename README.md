@@ -7,7 +7,7 @@ This package supports PHP 8.2–8.5 and deliberately does not install Symfony,
 Laravel, Slim or Mezzio. Install it directly for a headless/domain-only host:
 
 ```bash
-composer require sohophp/sofinder-core:^1.0
+composer require sohophp/sofinder-core:^1.1
 ```
 
 Applications must supply explicit authorization and a PSR-14 event dispatcher.
