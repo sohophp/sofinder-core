@@ -7,6 +7,7 @@ namespace SohoPHP\SoFinder\Trash;
 use SohoPHP\SoFinder\Contract\ActorProviderInterface;
 use SohoPHP\SoFinder\Contract\LocalPathProviderInterface;
 use SohoPHP\SoFinder\Contract\RecycleBinInterface;
+use SohoPHP\SoFinder\Contract\TrashPurgeGuardInterface;
 use SohoPHP\SoFinder\Exception\ConflictException;
 use SohoPHP\SoFinder\Exception\NotFoundException;
 use SohoPHP\SoFinder\Exception\SoFinderException;
@@ -24,6 +25,7 @@ final class TrashManager implements RecycleBinInterface
         private readonly int $retentionDays = 30,
         private readonly int $maxItems = 1000,
         private readonly int $maxBytes = 1073741824,
+        private readonly ?TrashPurgeGuardInterface $purgeGuard = null,
     ) {
     }
 
@@ -86,6 +88,9 @@ final class TrashManager implements RecycleBinInterface
             if (!$oldest instanceof TrashItem) {
                 continue;
             }
+            if ($this->purgeGuard?->blockingReason($oldest) !== null) {
+                continue;
+            }
             $this->removeTree($this->itemDirectory($oldest->id));
             if (file_exists($this->itemDirectory($oldest->id)) || is_link($this->itemDirectory($oldest->id))) {
                 throw new SoFinderException('The oldest recycle bin item could not be removed to free capacity.', 'trash_cleanup_failed', 507);
@@ -94,6 +99,9 @@ final class TrashManager implements RecycleBinInterface
             $statistics['usedBytes'] = max(0, $statistics['usedBytes'] - $oldest->size);
             ++$purgedItems;
             $purgedBytes += $oldest->size;
+        }
+        if ($statistics['usedItems'] >= $this->maxItems || $size > $this->maxBytes - $statistics['usedBytes']) {
+            throw new SoFinderException('Recycle-bin capacity cannot be freed because retained items are still referenced.', 'trash_capacity_protected', 507);
         }
 
         // The timestamp prefix provides deterministic FIFO ordering for multiple
@@ -258,6 +266,10 @@ final class TrashManager implements RecycleBinInterface
                 }
                 $data = $this->readManifest($directory->getPathname() . '/item.json');
                 if ($data !== null && (int) ($data['expiresAt'] ?? PHP_INT_MAX) <= time()) {
+                    $item = $this->itemFromData($data);
+                    if ($item === null || $this->purgeGuard?->blockingReason($item) !== null) {
+                        continue;
+                    }
                     $this->removeTree($directory->getPathname());
                     ++$purged;
                     if ($limit !== null && $purged >= $limit) {
@@ -284,6 +296,24 @@ final class TrashManager implements RecycleBinInterface
             $id,
             (string) ($data['resource'] ?? ''),
             $this->paths->normalize((string) ($data['path'] ?? '')),
+            (bool) ($data['directory'] ?? false),
+            (int) ($data['size'] ?? 0),
+            (int) ($data['deletedAt'] ?? 0),
+            (int) ($data['expiresAt'] ?? 0),
+        );
+    }
+
+    /** @param array<string,mixed> $data */
+    private function itemFromData(array $data): ?TrashItem
+    {
+        if (!is_string($data['id'] ?? null) || !is_string($data['resource'] ?? null) || !is_string($data['path'] ?? null)) {
+            return null;
+        }
+
+        return new TrashItem(
+            $data['id'],
+            $data['resource'],
+            $data['path'],
             (bool) ($data['directory'] ?? false),
             (int) ($data['size'] ?? 0),
             (int) ($data['deletedAt'] ?? 0),

@@ -457,12 +457,12 @@ final class LocalStorageAdapter implements StorageAdapterInterface, LocalPathPro
                 $this->removeAbsolute($child->getPathname());
             }
             if (!@rmdir($path)) {
-                throw new SoFinderException('Unable to delete the folder.');
+                throw new SoFinderException('Unable to delete the folder.', 'folder_delete_failed', 409);
             }
             return;
         }
         if (!@unlink($path)) {
-            throw new SoFinderException('Unable to delete the file.');
+            throw new SoFinderException('Unable to delete the file.', 'file_delete_failed', 409);
         }
     }
 

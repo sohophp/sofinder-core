@@ -25,6 +25,7 @@ final class ConfigurationNormalizer
         'cluster' => ['state_service' => null, 'chunk_upload_store_service' => null, 'shared_preview_cache' => false],
         'signed_urls' => ['enabled' => false, 'secret' => '%kernel.secret%', 'default_ttl_seconds' => 300, 'max_ttl_seconds' => 3600],
         'picker' => ['allowed_origins' => [], 'lock_resource' => true],
+        'security' => ['production_strict' => false, 'allowed_image_origins' => []],
         'asset_catalog' => ['enabled' => false, 'store_service' => null, 'register_existing' => 'lazy', 'alt_locales' => ['en', 'zh-cn', 'zh-tw']],
         'asset_search' => ['enabled' => true, 'provider_service' => null, 'max_scanned_entries' => 10000],
         'asset_usage' => ['enabled' => false, 'store_service' => null],
@@ -194,7 +195,7 @@ final class ConfigurationNormalizer
         $this->enum($config, 'maintenance.mode', ['inline', 'messenger', 'external', 'disabled']);
 
         foreach ([
-            'cluster.shared_preview_cache', 'signed_urls.enabled', 'picker.lock_resource', 'asset_catalog.enabled',
+            'cluster.shared_preview_cache', 'signed_urls.enabled', 'picker.lock_resource', 'security.production_strict', 'asset_catalog.enabled',
             'asset_search.enabled', 'asset_usage.enabled', 'asset_access_sessions.enabled',
             'workspaces.enabled', 'uploads.naming.lowercase_extensions',
             'ckeditor4.overwrite_on_upload', 'image_processing.watermark_font_auto_download',
@@ -248,6 +249,11 @@ final class ConfigurationNormalizer
         foreach ($config['picker']['allowed_origins'] as $origin) {
             if (!is_string($origin) || preg_match('#^https?://[A-Za-z0-9.-]+(?::[1-9][0-9]{0,4})?$#D', $origin) !== 1) {
                 throw new \InvalidArgumentException('Every SoFinder picker.allowed_origins value must be an exact HTTP(S) origin without a path.');
+            }
+        }
+        foreach ($config['security']['allowed_image_origins'] as $origin) {
+            if (!is_string($origin) || preg_match('#^https?://[A-Za-z0-9.-]+(?::[1-9][0-9]{0,4})?$#D', $origin) !== 1) {
+                throw new \InvalidArgumentException('Every SoFinder security.allowed_image_origins value must be an exact HTTP(S) origin without a path.');
             }
         }
         $locales = $config['asset_catalog']['alt_locales'];
@@ -322,6 +328,16 @@ final class ConfigurationNormalizer
             foreach ($resource['path_acl'] as $index => $rule) {
                 if (!is_array($rule) || !isset($rule['operations']) || !is_array($rule['operations']) || $rule['operations'] === []) {
                     throw new \InvalidArgumentException("SoFinder resource $name.path_acl.$index requires operations.");
+                }
+            }
+        }
+        if ($config['security']['production_strict']) {
+            if (!$config['malware_scanning']['enabled']) {
+                throw new \InvalidArgumentException('SoFinder security.production_strict requires malware_scanning.enabled.');
+            }
+            foreach ($config['resources'] as $name => $resource) {
+                if ($resource['delivery_mode'] !== 'proxy') {
+                    throw new \InvalidArgumentException("SoFinder security.production_strict requires proxy delivery for resource $name.");
                 }
             }
         }

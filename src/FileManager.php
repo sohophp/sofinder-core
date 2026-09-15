@@ -543,6 +543,7 @@ final class FileManager
             throw new \SohoPHP\SoFinder\Exception\NotFoundException();
         }
         $item = $this->authorized($resourceName, 'trash_delete', $trashed->path, true);
+        $this->before('trash_delete', $item, $trashed->path, ['trash_id' => $id]);
         $this->trash->permanentlyDelete($id);
         $this->after('trash_delete', $item, $trashed->path, ['trash_id' => $id]);
     }
