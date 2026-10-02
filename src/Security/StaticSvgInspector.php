@@ -12,6 +12,9 @@ final class StaticSvgInspector
     /** @return array{width:int,height:int} */
     public function inspect(string $path): array
     {
+        if (!class_exists(\DOMDocument::class)) {
+            throw new SoFinderException('SVG uploads require the PHP DOM extension.', 'unsupported_image', 415);
+        }
         $source = file_get_contents($path);
         if ($source === false || preg_match('/<!\s*(?:DOCTYPE|ENTITY)\b/i', $source)) {
             throw new SoFinderException('Invalid or unsafe SVG content.', 'invalid_image', 415);

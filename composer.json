@@ -17,6 +17,9 @@
         "psr/event-dispatcher": "^1.0",
         "psr/log": "^3.0"
     },
+    "suggest": {
+        "ext-dom": "Required for safe SVG upload inspection"
+    },
     "conflict": {
         "sohophp/sofinder-legacy": "*"
     },
