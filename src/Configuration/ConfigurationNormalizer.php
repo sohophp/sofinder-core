@@ -38,6 +38,7 @@ final class ConfigurationNormalizer
         'trash_retention_days' => 30,
         'trash_max_items' => 1000,
         'trash_max_bytes' => 1073741824,
+        'trash_purge_guard_service' => null,
         'ckeditor4' => ['overwrite_on_upload' => false],
         'malware_scanning' => ['enabled' => false, 'endpoint' => 'tcp://127.0.0.1:3310', 'timeout_seconds' => 5.0, 'history_limit' => 100, 'status_roles' => ['ROLE_ADMIN']],
         'image_processing' => [
@@ -207,6 +208,11 @@ final class ConfigurationNormalizer
         }
         foreach (array_keys($config['features']) as $key) {
             $this->boolean($config, 'features.' . $key);
+        }
+
+        $guard = $config['trash_purge_guard_service'];
+        if ($guard !== null && (!is_string($guard) || trim($guard) === '')) {
+            throw new \InvalidArgumentException('SoFinder trash_purge_guard_service must be a non-empty service ID.');
         }
 
         $this->integerRange($config, 'chunk_size', 262144, 16777216);

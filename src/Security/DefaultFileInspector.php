@@ -26,9 +26,18 @@ final class DefaultFileInspector implements FileInspectorInterface
             throw new SoFinderException('The uploaded file exceeds the configured size limit.', 'file_too_large', 413);
         }
         $mimeType = (new \finfo(FILEINFO_MIME_TYPE))->file($path) ?: 'application/octet-stream';
+        $extension = strtolower((string) pathinfo($fileName, PATHINFO_EXTENSION));
+        if ($extension === 'svg') {
+            if (!in_array($mimeType, ['image/svg+xml', 'text/xml', 'application/xml', 'text/plain'], true)) {
+                throw new SoFinderException('The SVG extension does not match its content.', 'invalid_image', 415);
+            }
+            $dimensions = (new StaticSvgInspector())->inspect($path);
+            $this->assertImageLimits($dimensions, $resource);
+            $resource->assertMimeAllowed('image/svg+xml');
+            return new InspectedFile((int) $size, 'image/svg+xml', $dimensions['width'], $dimensions['height']);
+        }
         $resource->assertMimeAllowed($mimeType);
 
-        $extension = strtolower((string) pathinfo($fileName, PATHINFO_EXTENSION));
         $format = $this->formats->formatForExtension($extension);
         if ($format === null) {
             $this->assertNoActiveContent($path);

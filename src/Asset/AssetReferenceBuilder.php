@@ -48,10 +48,12 @@ final class AssetReferenceBuilder
         $embeddable = $entry->url !== null && $entry->url !== '';
         $capabilities = $entry->capabilities + [];
         $capabilities['embeddable'] = $embeddable;
-        $capabilities['responsiveImages'] = $embeddable && $this->variantsEnabled && $dimensions !== null && $entry->mimeType !== null && str_starts_with($entry->mimeType, 'image/');
+        $canGenerateVariants = $embeddable && $this->variantsEnabled && $dimensions !== null
+            && $entry->mimeType !== null && str_starts_with($entry->mimeType, 'image/') && $entry->mimeType !== 'image/svg+xml';
+        $capabilities['responsiveImages'] = $canGenerateVariants;
         $capabilities['assetMetadata'] = $record !== null && ($entry->capabilities['metadata.update'] ?? false);
         $variants = [];
-        if ($embeddable && $this->variantsEnabled && $dimensions !== null && $entry->mimeType !== null && str_starts_with($entry->mimeType, 'image/')) {
+        if ($canGenerateVariants) {
             $format = $this->images?->preferredVariantFormat((string) $entry->mimeType, $this->variantFormats) ?? 'original';
             $mime = $format === 'original' ? $entry->mimeType : 'image/' . $format;
             foreach ($this->variantWidths as $width) {
