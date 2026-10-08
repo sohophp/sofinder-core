@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SohoPHP\SoFinder\Configuration;
 
+use SohoPHP\SoFinder\Value\ResourceType;
+
 /**
  * Framework-neutral normalization for YAML, PHP and adapter-provided arrays.
  *
@@ -34,7 +36,7 @@ final class ConfigurationNormalizer
         'filesystem_permissions' => ['directory_mode' => '0775', 'file_mode' => '0664'],
         'chunk_size' => 5242880,
         'max_upload_chunks' => 200,
-        'uploads' => ['naming' => ['lowercase_extensions' => true]],
+        'uploads' => ['naming' => ['lowercase_extensions' => true], 'image_resize' => null],
         'trash_retention_days' => 30,
         'trash_max_items' => 1000,
         'trash_max_bytes' => 1073741824,
@@ -42,6 +44,7 @@ final class ConfigurationNormalizer
         'ckeditor4' => ['overwrite_on_upload' => false],
         'malware_scanning' => ['enabled' => false, 'endpoint' => 'tcp://127.0.0.1:3310', 'timeout_seconds' => 5.0, 'history_limit' => 100, 'status_roles' => ['ROLE_ADMIN']],
         'image_processing' => [
+            'action_pipeline' => null,
             'driver' => 'auto', 'max_width' => 12000, 'max_height' => 12000,
             'max_single_frame_pixels' => 50000000, 'max_frames' => 200,
             'max_total_pixels' => 100000000, 'memory_bytes' => 268435456,
@@ -189,6 +192,16 @@ final class ConfigurationNormalizer
         }
 
         $this->enum($config, 'image_processing.driver', ['auto', 'gd', 'imagick']);
+        foreach (['image_processing' => 'action_pipeline', 'uploads' => 'image_resize'] as $section => $key) {
+            $value = $config[$section][$key];
+            if ($value === null) continue;
+            if (!is_array($value)) throw new \InvalidArgumentException('SoFinder image policies must be configuration arrays or null.');
+            if ($section === 'image_processing') new \SohoPHP\SoFinder\Image\ImageActionOptions($value);
+            else new \SohoPHP\SoFinder\Image\ImageUploadResizeOptions($value);
+        }
+        if ($config['image_processing']['action_pipeline'] !== null && $config['image_processing']['driver'] === 'imagick') {
+            throw new \InvalidArgumentException('The basic action pipeline requires the GD driver; use auto or gd.');
+        }
         $this->enum($config, 'document_preview.mode', ['auto', 'inline', 'messenger']);
         $this->enum($config, 'ui.mode', ['auto', 'manager', 'picker']);
         $this->enum($config, 'ui.scale', ['compact', 'standard', 'large', 'xlarge']);
@@ -315,11 +328,11 @@ final class ConfigurationNormalizer
             }
             foreach ([
                 'max_size' => PHP_INT_MAX, 'max_file_name_length' => 255,
-                'max_folder_name_length' => 255, 'max_folder_depth' => 100,
+                'max_folder_name_length' => 255, 'max_folder_depth' => ResourceType::MAX_FOLDER_DEPTH,
                 'max_image_pixels' => PHP_INT_MAX, 'max_batch_items' => 1000,
                 'max_recursive_items' => 100000, 'max_archive_items' => 100000,
-                'max_archive_bytes' => PHP_INT_MAX, 'max_image_width' => 100000,
-                'max_image_height' => 100000,
+                'max_archive_bytes' => PHP_INT_MAX, 'max_image_width' => ResourceType::MAX_IMAGE_DIMENSION,
+                'max_image_height' => ResourceType::MAX_IMAGE_DIMENSION,
             ] as $key => $maximum) {
                 if (!is_int($resource[$key]) || $resource[$key] < 1 || $resource[$key] > $maximum) {
                     throw new \InvalidArgumentException("SoFinder resource $name.$key must be between 1 and $maximum.");

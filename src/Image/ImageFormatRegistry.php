@@ -11,7 +11,7 @@ final class ImageFormatRegistry
      */
     private const FORMATS = [
         'avif' => ['extensions' => ['avif'], 'mimes' => ['image/avif'], 'coder' => 'AVIF', 'web' => true, 'editable' => true],
-        'bmp' => ['extensions' => ['bmp'], 'mimes' => ['image/bmp', 'image/x-bmp'], 'coder' => 'BMP', 'web' => true, 'editable' => true],
+        'bmp' => ['extensions' => ['bmp'], 'mimes' => ['image/bmp', 'image/x-bmp', 'image/x-ms-bmp'], 'coder' => 'BMP', 'web' => true, 'editable' => true],
         'gif' => ['extensions' => ['gif'], 'mimes' => ['image/gif'], 'coder' => 'GIF', 'web' => true, 'editable' => true],
         'ico' => ['extensions' => ['ico'], 'mimes' => ['image/vnd.microsoft.icon', 'image/x-icon'], 'coder' => 'ICO', 'web' => true, 'editable' => true],
         'jpeg' => ['extensions' => ['jpg', 'jpeg'], 'mimes' => ['image/jpeg'], 'coder' => 'JPEG', 'web' => true, 'editable' => true],

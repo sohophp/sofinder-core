@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SohoPHP\SoFinder\Image;
 
 use SohoPHP\SoFinder\Contract\ImageProcessorInterface;
+use SohoPHP\SoFinder\Contract\ImageActionProcessorInterface;
 use SohoPHP\SoFinder\Contract\ImageCapabilityProviderInterface;
 use SohoPHP\SoFinder\Contract\ImageEffectsProcessorInterface;
 use SohoPHP\SoFinder\Exception\SoFinderException;
@@ -178,12 +179,26 @@ final class ImageManager
         $outputMimeType = $entry->mimeType;
         try {
             $this->copySource($resource, $path, $source);
-            if ($this->processor->isAnimated($source)) {
+            if ($this->processor->isAnimated($source)
+                && !($this->processor instanceof ImageActionProcessorInterface && $this->processor->allowsAnimatedEditing($source))) {
                 throw new SoFinderException('Animated or multi-page images cannot be edited without losing content.', 'animated_image_edit_unsupported', 415);
             }
             $originalDimensions = $this->processor->dimensions($source);
-            $lastActionIndex = array_key_last($actions);
-            foreach ($actions as $actionIndex => $action) {
+            $remainingActions = $actions;
+            if ($this->processor instanceof ImageActionProcessorInterface) {
+                $output = tempnam(sys_get_temp_dir(), 'sofinder-image-pipeline-');
+                if ($output === false) throw new SoFinderException('Unable to create an image action file.', 'image_processing_failed', 500);
+                $working = $output;
+                $this->processor->applyActions($source, $working, $actions);
+                $format = $this->formats->detectFormat($working);
+                $outputMimeType = $format === null ? null : $this->formats->canonicalMime($format);
+                if ($outputMimeType === null || !$this->processor->supports($outputMimeType)) {
+                    throw new SoFinderException('The image pipeline produced an unsupported format.', 'unsupported_image_output_format', 415);
+                }
+                $remainingActions = [];
+            }
+            $lastActionIndex = array_key_last($remainingActions);
+            foreach ($remainingActions as $actionIndex => $action) {
                 $output = tempnam(sys_get_temp_dir(), 'sofinder-image-action-');
                 if ($output === false) {
                     throw new SoFinderException('Unable to create an image action file.', 'image_processing_failed', 500);

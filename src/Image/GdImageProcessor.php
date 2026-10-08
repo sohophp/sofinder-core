@@ -15,8 +15,12 @@ final class GdImageProcessor implements ImageProcessorInterface, ImageEffectsPro
         private readonly ImageFormatRegistry $formats = new ImageFormatRegistry(),
         private readonly ?string $watermarkFont = null,
         private readonly ?WatermarkFontResolver $watermarkFontResolver = null,
+        private readonly int $maximumDimension = 4096,
     )
     {
+        if ($maximumDimension < 1 || $maximumDimension > 2_147_483_647) {
+            throw new \InvalidArgumentException('Image output dimension limit must be a positive 32-bit integer.');
+        }
     }
 
     public function supports(string $mimeType): bool
@@ -85,15 +89,7 @@ final class GdImageProcessor implements ImageProcessorInterface, ImageEffectsPro
         if (!$this->supports($mimeType) || $width < 1 || $height < 1 || $width * $height > $this->maximumPixels) {
             throw new SoFinderException('The image format or dimensions are not supported.', 'unsupported_image', 415);
         }
-        if ($mimeType === 'image/jpeg' && function_exists('exif_read_data')) {
-            $exif = @exif_read_data($source);
-            $orientation = is_array($exif) ? (int) ($exif['Orientation'] ?? 1) : 1;
-            if (in_array($orientation, [5, 6, 7, 8], true)) {
-                [$width, $height] = [$height, $width];
-            }
-        }
-
-        return ['width' => $width, 'height' => $height];
+        return ImageOrientation::dimensions($width, $height, $source, $mimeType);
     }
 
     public function validate(string $source): array
@@ -118,7 +114,7 @@ final class GdImageProcessor implements ImageProcessorInterface, ImageEffectsPro
         }
         $mime = strtolower((string) $info['mime']);
         if ($mime === 'image/gif') {
-            return preg_match_all('/\x00\x21\xF9\x04/s', $contents) > 1;
+            return $this->gifIsAnimated($contents);
         }
         if ($mime === 'image/webp') {
             return str_contains($contents, 'ANIM') || substr_count($contents, 'ANMF') > 1;
@@ -128,6 +124,42 @@ final class GdImageProcessor implements ImageProcessorInterface, ImageEffectsPro
         }
 
         return false;
+    }
+
+    private function gifIsAnimated(string $contents): bool
+    {
+        $length = strlen($contents);
+        if ($length < 13 || !in_array(substr($contents, 0, 6), ['GIF87a', 'GIF89a'], true)) {
+            throw new SoFinderException('The GIF structure is invalid.', 'invalid_image', 415);
+        }
+        $packed = ord($contents[10]);
+        $offset = 13 + (($packed & 0x80) !== 0 ? 3 * (1 << (($packed & 7) + 1)) : 0);
+        $frames = 0;
+        while ($offset < $length) {
+            $block = ord($contents[$offset++]);
+            if ($block === 0x3b) return $frames > 1;
+            if ($block === 0x21) {
+                // Every extension (including comments and graphic controls) uses sub-blocks.
+                if ($offset >= $length) break;
+                ++$offset;
+            } elseif ($block === 0x2c) {
+                if ($offset + 9 >= $length) break;
+                $packed = ord($contents[$offset + 8]);
+                $offset += 9 + (($packed & 0x80) !== 0 ? 3 * (1 << (($packed & 7) + 1)) : 0);
+                if ($offset >= $length) break;
+                ++$offset; // LZW minimum code size precedes the image-data sub-blocks.
+                ++$frames;
+            } else {
+                break;
+            }
+            do {
+                if ($offset >= $length) break 2;
+                $size = ord($contents[$offset++]);
+                if ($offset + $size > $length) break 2;
+                $offset += $size;
+            } while ($size !== 0);
+        }
+        throw new SoFinderException('The GIF structure is incomplete or invalid.', 'invalid_image', 415);
     }
 
     public function thumbnail(string $source, string $destination, int $width, int $height): void
@@ -169,7 +201,7 @@ final class GdImageProcessor implements ImageProcessorInterface, ImageEffectsPro
     {
         [$image, $mimeType] = $this->load($source);
         try {
-            if ($x < 0 || $y < 0 || $width < 1 || $height < 1 || $width > 4096 || $height > 4096 || $x + $width > imagesx($image) || $y + $height > imagesy($image)) {
+            if ($x < 0 || $y < 0 || $width < 1 || $height < 1 || $width > $this->maximumDimension || $height > $this->maximumDimension || $x + $width > imagesx($image) || $y + $height > imagesy($image)) {
                 throw new SoFinderException('The crop rectangle is outside the image.', 'invalid_crop', 422);
             }
             $cropped = imagecrop($image, ['x' => $x, 'y' => $y, 'width' => $width, 'height' => $height]);
@@ -313,30 +345,7 @@ final class GdImageProcessor implements ImageProcessorInterface, ImageEffectsPro
 
     private function orient(\GdImage $image, string $source, string $mimeType): \GdImage
     {
-        if ($mimeType !== 'image/jpeg' || !function_exists('exif_read_data')) {
-            return $image;
-        }
-        $exif = @exif_read_data($source);
-        $orientation = is_array($exif) ? (int) ($exif['Orientation'] ?? 1) : 1;
-        if (in_array($orientation, [2, 4, 5, 7], true)) {
-            imageflip($image, in_array($orientation, [2, 5], true) ? IMG_FLIP_HORIZONTAL : IMG_FLIP_VERTICAL);
-        }
-        $angle = match ($orientation) {
-            3 => 180,
-            5, 6 => -90,
-            7, 8 => 90,
-            default => 0,
-        };
-        if ($angle === 0) {
-            return $image;
-        }
-        $rotated = imagerotate($image, $angle, 0);
-        if (!$rotated instanceof \GdImage) {
-            throw new SoFinderException('Unable to apply the image orientation.', 'image_processing_failed', 500);
-        }
-        unset($image);
-
-        return $rotated;
+        return ImageOrientation::apply($image, $source, $mimeType);
     }
 
     private function resizeAndSave(\GdImage $source, string $mimeType, string $destination, int $width, int $height, bool $allowOriginalSize, int $quality = 88): void
@@ -344,8 +353,8 @@ final class GdImageProcessor implements ImageProcessorInterface, ImageEffectsPro
         if ($quality < 1 || $quality > 100) {
             throw new SoFinderException('Image quality must be between 1 and 100.', 'invalid_image_quality', 422);
         }
-        if ($width < 0 || $height < 0 || $width > 4096 || $height > 4096 || ($width === 0 && $height === 0 && !$allowOriginalSize)) {
-            throw new SoFinderException('Image dimensions must be between 1 and 4096 pixels.', 'invalid_image_dimensions', 422);
+        if ($width < 0 || $height < 0 || $width > $this->maximumDimension || $height > $this->maximumDimension || ($width === 0 && $height === 0 && !$allowOriginalSize)) {
+            throw new SoFinderException(sprintf('Image dimensions must be between 1 and %d pixels.', $this->maximumDimension), 'invalid_image_dimensions', 422);
         }
         $sourceWidth = imagesx($source);
         $sourceHeight = imagesy($source);

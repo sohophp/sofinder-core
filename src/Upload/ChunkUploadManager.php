@@ -6,10 +6,13 @@ namespace SohoPHP\SoFinder\Upload;
 
 use SohoPHP\SoFinder\Contract\ActorProviderInterface;
 use SohoPHP\SoFinder\Contract\ChunkUploadStoreInterface;
+use SohoPHP\SoFinder\Contract\ChunkUploadSessionGuardInterface;
 use SohoPHP\SoFinder\Exception\SoFinderException;
 
-final class ChunkUploadManager implements ChunkUploadStoreInterface
+final class ChunkUploadManager implements ChunkUploadStoreInterface, ChunkUploadSessionGuardInterface
 {
+    /** @var array<string,true> */
+    private array $heldLocks = [];
     public function __construct(
         private readonly string $root,
         private readonly ActorProviderInterface $actors,
@@ -24,24 +27,29 @@ final class ChunkUploadManager implements ChunkUploadStoreInterface
      */
     public function accept(string $id, int $index, int $total, mixed $stream, int $maximumFileBytes, array $context = []): array
     {
-        $directory = $this->directory($id, true);
         if ($index < 0 || $total < 1 || $total > $this->maximumChunks || $index >= $total || !is_resource($stream)) {
             throw new SoFinderException('The chunk upload coordinates are invalid.', 'invalid_upload_chunk', 400);
         }
-        $lock = @fopen($directory . '/session.lock', 'c+b');
-        if ($lock === false || !flock($lock, LOCK_EX)) {
-            if (is_resource($lock)) fclose($lock);
-            throw new SoFinderException('The chunk upload session is busy.', 'chunk_session_unavailable', 503);
+        return $this->withSessionLock($id, fn (): array => $this->acceptLocked($id, $index, $total, $stream, $maximumFileBytes, $context));
+    }
+
+    /**
+     * @param resource $stream
+     * @param array{resource?:string,path?:string,name?:string,overwrite?:bool,autoRename?:bool,workspace?:string} $context
+     * @return array{complete:bool,path?:string,size?:int}
+     */
+    private function acceptLocked(string $id, int $index, int $total, mixed $stream, int $maximumFileBytes, array $context): array
+    {
+        $directory = $this->directory($id, true);
+        $this->persistManifest($directory, $id, $total, $context);
+        $part = $directory . '/part-' . $index;
+        $temporary = $part . '.tmp-' . bin2hex(random_bytes(6));
+        $output = @fopen($temporary, 'wb');
+        if ($output === false) {
+            throw new SoFinderException('Unable to stage the upload chunk.', 'chunk_write_failed', 500);
         }
+        $written = 0;
         try {
-            $this->persistManifest($directory, $id, $total, $context);
-            $part = $directory . '/part-' . $index;
-            $temporary = $part . '.tmp-' . bin2hex(random_bytes(6));
-            $output = @fopen($temporary, 'wb');
-            if ($output === false) {
-                throw new SoFinderException('Unable to stage the upload chunk.', 'chunk_write_failed', 500);
-            }
-            $written = 0;
             try {
                 while (!feof($stream)) {
                     $chunk = fread($stream, 65_536);
@@ -57,68 +65,99 @@ final class ChunkUploadManager implements ChunkUploadStoreInterface
                 fclose($output);
             }
             if (!@rename($temporary, $part)) {
-                @unlink($temporary);
                 throw new SoFinderException('Unable to publish the upload chunk.', 'chunk_write_failed', 500);
             }
-            @touch($directory);
-
-            $size = 0;
-            for ($partIndex = 0; $partIndex < $total; ++$partIndex) {
-                $candidate = $directory . '/part-' . $partIndex;
-                if (!is_file($candidate)) return ['complete' => false];
-                $size += (int) filesize($candidate);
-                if ($size > $maximumFileBytes) {
-                    throw new SoFinderException('The assembled upload exceeds the configured file size.', 'file_too_large', 413);
-                }
-            }
-            $assembled = $directory . '/assembled';
-            $combined = @fopen($assembled . '.tmp', 'wb');
-            if ($combined === false) throw new SoFinderException('Unable to assemble the upload.', 'chunk_assembly_failed', 500);
-            try {
-                for ($partIndex = 0; $partIndex < $total; ++$partIndex) {
-                    $input = @fopen($directory . '/part-' . $partIndex, 'rb');
-                    if ($input === false) throw new SoFinderException('An upload chunk disappeared during assembly.', 'chunk_assembly_failed', 500);
-                    try {
-                        if (stream_copy_to_stream($input, $combined) === false) throw new SoFinderException('Unable to assemble the upload.', 'chunk_assembly_failed', 500);
-                    } finally { fclose($input); }
-                }
-            } finally { fclose($combined); }
-            if (!@rename($assembled . '.tmp', $assembled)) throw new SoFinderException('Unable to publish the assembled upload.', 'chunk_assembly_failed', 500);
-
-            return ['complete' => true, 'path' => $assembled, 'size' => $size];
         } finally {
-            flock($lock, LOCK_UN);
-            fclose($lock);
+            // Close before unlink for platforms that cannot delete an open file.
+            // A failed replacement must leave the accepted part untouched.
+            if (is_file($temporary)) @unlink($temporary);
         }
+        @touch($directory);
+
+        $size = 0;
+        for ($partIndex = 0; $partIndex < $total; ++$partIndex) {
+            $candidate = $directory . '/part-' . $partIndex;
+            if (!is_file($candidate)) return ['complete' => false];
+            $size += (int) filesize($candidate);
+            if ($size > $maximumFileBytes) {
+                throw new SoFinderException('The assembled upload exceeds the configured file size.', 'file_too_large', 413);
+            }
+        }
+        $assembled = $directory . '/assembled';
+        $combined = @fopen($assembled . '.tmp', 'wb');
+        if ($combined === false) throw new SoFinderException('Unable to assemble the upload.', 'chunk_assembly_failed', 500);
+        try {
+            for ($partIndex = 0; $partIndex < $total; ++$partIndex) {
+                $input = @fopen($directory . '/part-' . $partIndex, 'rb');
+                if ($input === false) throw new SoFinderException('An upload chunk disappeared during assembly.', 'chunk_assembly_failed', 500);
+                try {
+                    if (stream_copy_to_stream($input, $combined) === false) throw new SoFinderException('Unable to assemble the upload.', 'chunk_assembly_failed', 500);
+                } finally { fclose($input); }
+            }
+        } finally { fclose($combined); }
+        if (!@rename($assembled . '.tmp', $assembled)) throw new SoFinderException('Unable to publish the assembled upload.', 'chunk_assembly_failed', 500);
+
+        return ['complete' => true, 'path' => $assembled, 'size' => $size];
     }
 
     public function discard(string $id): void
     {
-        $directory = $this->directory($id, false);
-        if (!is_dir($directory)) return;
-        foreach (new \FilesystemIterator($directory, \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::CURRENT_AS_FILEINFO) as $file) {
-            if (!$file instanceof \SplFileInfo) continue;
-            if ($file->isFile() && !$file->isLink()) @unlink($file->getPathname());
-        }
-        @rmdir($directory);
+        $this->withSessionLock($id, function () use ($id): void {
+            $directory = $this->directory($id, false);
+            if (is_dir($directory)) $this->removeDirectory($directory);
+        });
     }
 
     public function status(string $id): array
     {
-        $directory = $this->directory($id, false);
-        $manifest = $this->readManifest($directory);
-        $received = [];
-        for ($index = 0; $index < $manifest['total']; ++$index) {
-            if (is_file($directory . '/part-' . $index)) {
-                $received[] = $index;
+        return $this->withSessionLock($id, function () use ($id): array {
+            $directory = $this->directory($id, false);
+            $manifest = $this->readManifest($directory);
+            $received = [];
+            for ($index = 0; $index < $manifest['total']; ++$index) {
+                if (is_file($directory . '/part-' . $index)) $received[] = $index;
             }
-        }
+            return $manifest + ['received' => $received, 'complete' => is_file($directory . '/assembled'),
+                'updatedAt' => (int) filemtime($directory)];
+        });
+    }
 
-        return $manifest + [
-            'received' => $received,
-            'complete' => is_file($directory . '/assembled'),
-            'updatedAt' => (int) filemtime($directory),
-        ];
+    /**
+     * @template T
+     * @param callable():T $operation
+     * @return T
+     */
+    public function withSessionLock(string $id, callable $operation): mixed
+    {
+        // Validate before creating lock state. Stable bounded locks live outside
+        // removable sessions, so waiters cannot acquire an unlinked lock inode.
+        $this->directory($id, false);
+        $path = $this->lockPath($this->actorRoot(true), $id);
+        if (isset($this->heldLocks[$path])) return $operation();
+        $lock = $this->openLock($path, false);
+        if ($lock === null) throw new SoFinderException('The chunk upload session is busy.', 'chunk_session_unavailable', 503);
+        $this->heldLocks[$path] = true;
+        try { return $operation(); }
+        finally {
+            unset($this->heldLocks[$path]);
+            flock($lock, LOCK_UN); fclose($lock);
+        }
+    }
+
+    private function lockPath(string $actorDirectory, string $id): string
+    {
+        // At most 64 lock files per actor. Colliding sessions serialize safely;
+        // different buckets can proceed concurrently. Maintenance retains locks.
+        return $actorDirectory . '/.session-lock-' . sprintf('%02x', ord(hash('sha256', $id, true)[0]) & 63);
+    }
+
+    /** @return resource|null */
+    private function openLock(string $path, bool $nonBlocking): mixed
+    {
+        $lock = @fopen($path, 'c+b');
+        if ($lock === false) return null;
+        if (!flock($lock, LOCK_EX | ($nonBlocking ? LOCK_NB : 0))) { fclose($lock); return null; }
+        return $lock;
     }
 
     public function cleanupExpired(bool $allActors = false, ?int $limit = null): int
@@ -137,16 +176,33 @@ final class ChunkUploadManager implements ChunkUploadStoreInterface
             if (!is_dir($actorPath) || is_link($actorPath)) continue;
             foreach (new \FilesystemIterator($actorPath, \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::CURRENT_AS_FILEINFO) as $directory) {
                 if (!$directory instanceof \SplFileInfo) continue;
-                if (!$directory->isDir() || $directory->isLink() || $directory->getMTime() >= time() - 86_400) continue;
-                $this->removeDirectory($directory->getPathname());
-                if (!is_dir($directory->getPathname())) {
-                    ++$purged;
-                    if ($limit !== null && $purged >= $limit) return $purged;
-                }
+                if (!$this->expiredDirectory($directory->getPathname())) continue;
+                if (preg_match('/^[a-zA-Z0-9_-]{16,80}$/D', $directory->getFilename()) !== 1) continue;
+                $lock = $this->openLock($this->lockPath($actorPath, $directory->getFilename()), true);
+                if ($lock === null) continue;
+                try {
+                    if (!$this->expiredDirectory($directory->getPathname())) continue;
+                    $this->removeDirectory($directory->getPathname());
+                    if (!is_dir($directory->getPathname())) {
+                        ++$purged;
+                        if ($limit !== null && $purged >= $limit) return $purged;
+                    }
+                } finally { flock($lock, LOCK_UN); fclose($lock); }
             }
         }
 
         return $purged;
+    }
+
+    /**
+     * File state can change while another process holds the session lock.
+     * @phpstan-impure
+     */
+    private function expiredDirectory(string $directory): bool
+    {
+        clearstatcache(true, $directory);
+        $modified = @filemtime($directory);
+        return is_dir($directory) && !is_link($directory) && $modified !== false && $modified < time() - 86_400;
     }
 
     /** @param array<string, mixed> $context */

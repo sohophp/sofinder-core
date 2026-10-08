@@ -8,6 +8,10 @@ use SohoPHP\SoFinder\Exception\SoFinderException;
 
 final class ResourceType implements \JsonSerializable
 {
+    /** Positive 32-bit values remain exact across PHP hosts and JavaScript clients. */
+    public const MAX_FOLDER_DEPTH = 2_147_483_647;
+    public const MAX_IMAGE_DIMENSION = 2_147_483_647;
+
     /**
      * @param list<string> $allowedExtensions
      * @param list<string> $deniedExtensions
@@ -49,7 +53,7 @@ final class ResourceType implements \JsonSerializable
         if ($name === '' || $root === '') {
             throw new \InvalidArgumentException('Resource name and root are required.');
         }
-        if ($maxFileNameLength < 1 || $maxFileNameLength > 255 || $maxFolderNameLength < 1 || $maxFolderNameLength > 255 || $maxFolderDepth < 1 || $maxFolderDepth > 100 || $maxImagePixels < 1) {
+        if ($maxFileNameLength < 1 || $maxFileNameLength > 255 || $maxFolderNameLength < 1 || $maxFolderNameLength > 255 || $maxFolderDepth < 1 || $maxFolderDepth > self::MAX_FOLDER_DEPTH || $maxImagePixels < 1) {
             throw new \InvalidArgumentException('Resource name and folder limits are outside the supported range.');
         }
         if (!in_array($deliveryMode, ['public', 'proxy'], true)) {
