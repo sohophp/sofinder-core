@@ -574,12 +574,25 @@ final class FileManager
         return $item->storage->readStream($path);
     }
 
+    public function assertAuthenticated(): void
+    {
+        if (!$this->authorization->isAuthenticated()) throw new \SohoPHP\SoFinder\Exception\AccessDeniedException('Authentication is required.');
+    }
+
+    public function contentRevision(string $resourceName, string $path): string
+    {
+        $item = $this->authorized($resourceName, 'read', $path);
+        $snapshot = \SohoPHP\SoFinder\Security\ContentSnapshot::capture($item->storage->readStream($path), $item->resource->maxSize);
+        fclose($snapshot['stream']);
+        return $snapshot['sha256'];
+    }
+
     private function authorized(string $name, string $operation, string $path, bool $write = false): ResourceStorage
     {
-        $this->workspaces?->assertResource($name);
         if (!$this->authorization->isAuthenticated()) {
             throw new AccessDeniedException('Authentication is required.');
         }
+        $this->workspaces?->assertResource($name);
         $item = $this->resources->get($name);
         if ($write && $item->resource->readOnly) {
             throw new AccessDeniedException('This resource is read-only.');

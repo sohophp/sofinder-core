@@ -42,8 +42,11 @@ final class SignedUrlManager
         }
         $disposition = strtolower($disposition) === 'inline' ? 'inline' : 'attachment';
         $expiresAt = $this->now() + $ttl;
+        $snapshot = ContentSnapshot::capture($item->storage->readStream($entry->path), $item->resource->maxSize);
+        fclose($snapshot['stream']);
         $payload = $this->encode(json_encode([
-            'v' => 1,
+            'v' => 2,
+            'sha256' => $snapshot['sha256'],
             'resource' => $resource,
             'path' => $entry->path,
             'size' => $entry->size,
@@ -71,7 +74,8 @@ final class SignedUrlManager
         $json = $this->decode($matches[1]);
         $payload = is_string($json) ? json_decode($json, true) : null;
         if (!is_array($payload)
-            || ($payload['v'] ?? null) !== 1
+            || ($payload['v'] ?? null) !== 2
+            || !is_string($payload['sha256'] ?? null) || preg_match('/^[a-f0-9]{64}$/D', $payload['sha256']) !== 1
             || !is_string($payload['resource'] ?? null)
             || !is_string($payload['path'] ?? null)
             || !is_int($payload['size'] ?? null)
@@ -94,7 +98,12 @@ final class SignedUrlManager
         if ($entry->directory || $entry->size !== $payload['size'] || $entry->modifiedAt !== $payload['modifiedAt']) {
             throw new SoFinderException('The file changed after this signed URL was issued.', 'signed_url_stale', 410);
         }
-        $stream = $item->storage->readStream($path);
+        $snapshot = ContentSnapshot::capture($item->storage->readStream($path), $item->resource->maxSize);
+        if (!hash_equals($payload['sha256'], $snapshot['sha256'])) {
+            fclose($snapshot['stream']);
+            throw new SoFinderException('The file changed after this signed URL was issued.', 'signed_url_stale', 410);
+        }
+        $stream = $snapshot['stream'];
 
         return [
             'resource' => $payload['resource'],

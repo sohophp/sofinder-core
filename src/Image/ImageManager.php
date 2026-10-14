@@ -46,7 +46,7 @@ final class ImageManager
         if (!is_dir($directory) && !@mkdir($directory, $this->directoryMode, true) && !is_dir($directory)) throw new SoFinderException('Unable to create the image variant cache.', 'image_processing_failed', 500);
         $this->maintainCache($directory, $this->variantCacheTtl);
         $processorVersion = $this->processor instanceof ImageCapabilityProviderInterface ? $this->processor->cacheVersion() : get_debug_type($this->processor);
-        $cachePath = $directory . '/' . hash('sha256', implode('|', [$processorVersion, $resource, $entry->path, $entry->modifiedAt, $entry->size, $width, $format, $this->variantQuality])) . '.' . $extension;
+        $cachePath = $directory . '/' . hash('sha256', implode('|', [$processorVersion, $resource, $entry->path, $entry->modifiedAt, $entry->size, $this->files->contentRevision($resource, $path), $width, $format, $this->variantQuality])) . '.' . $extension;
         $lock = fopen($cachePath . '.lock', 'c+'); if ($lock === false || !flock($lock, LOCK_EX)) throw new SoFinderException('Unable to lock the image variant cache.', 'image_processing_failed', 500);
         try {
             if (!is_file($cachePath)) {
@@ -90,7 +90,7 @@ final class ImageManager
         @chmod($directory, $this->directoryMode);
         $this->maintainCache($directory);
         $processorVersion = $this->processor instanceof ImageCapabilityProviderInterface ? $this->processor->cacheVersion() : get_debug_type($this->processor);
-        $cachePath = $directory . '/' . hash('sha256', implode('|', [$processorVersion, $resource, $entry->path, $entry->modifiedAt, $entry->size, $width, $height])) . '.png';
+        $cachePath = $directory . '/' . hash('sha256', implode('|', [$processorVersion, $resource, $entry->path, $entry->modifiedAt, $entry->size, $this->files->contentRevision($resource, $path), $width, $height])) . '.png';
         if (!is_file($cachePath)) {
             $temporary = tempnam($directory, '.sofinder-thumbnail-');
             if ($temporary === false) {
