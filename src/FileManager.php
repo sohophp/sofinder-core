@@ -293,7 +293,8 @@ final class FileManager
             $item->resource->assertFileNameAllowed(basename($destination));
         }
         $additionalFolderDepth = $source->directory ? $this->maximumDescendantDepth($item, $path, $operation) : 0;
-        if ($destination === $path || ($source->directory && str_starts_with($destination, $path . '/'))) {
+        if (($destination === $path && !($operation === 'copy' && $autoRename))
+            || ($source->directory && str_starts_with($destination, $path . '/'))) {
             throw new InvalidPathException('An entry cannot be copied or moved into itself.');
         }
         $item->resource->assertEntryPathAllowed(
