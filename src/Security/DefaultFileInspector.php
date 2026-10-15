@@ -16,6 +16,7 @@ final class DefaultFileInspector implements FileInspectorInterface
     public function __construct(
         private readonly ImageProcessorInterface $images,
         private readonly ImageFormatRegistry $formats = new ImageFormatRegistry(),
+        private readonly bool $activeContentDetection = true,
     ) {
     }
 
@@ -40,7 +41,9 @@ final class DefaultFileInspector implements FileInspectorInterface
 
         $format = $this->formats->formatForExtension($extension);
         if ($format === null) {
-            $this->assertNoActiveContent($path);
+            if ($this->activeContentDetection) {
+                $this->assertNoActiveContent($path);
+            }
             return new InspectedFile((int) $size, $mimeType);
         }
         if (!$this->formats->mimeMatches($format, strtolower($mimeType))) {
